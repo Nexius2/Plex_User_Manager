@@ -8,7 +8,7 @@ RUN echo "**** install system packages ****" \
  && pip install mysql-connector-python \
  && apt-get install -y gcc g++ libxml2-dev libxslt-dev libz-dev wget \
  && sudo apt install mysql-server \
- && wget https://raw.githubusercontent.com/blacktwin/JBOPS/master/utility/plex_api_share.py
+ && wget https://raw.githubusercontent.com/blacktwin/JBOPS/master/utility/plex_api_share.py \
  && pip3 install --no-cache-dir --upgrade --requirement /requirements.txt \
  && apt-get --purge autoremove wget gcc g++ libxml2-dev libxslt-dev libz-dev -y \
  && apt-get clean \
