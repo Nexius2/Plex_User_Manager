@@ -1,4 +1,7 @@
 FROM ubuntu:latest
+LABEL maintainer="Nexius2" \
+      name="plex_user_manager" \
+      version="0.1"
 COPY . /
 ENV LANG C.UTF-8
 RUN echo "**** install system packages ****" \
