@@ -5,3 +5,4 @@
 requests
 plexapi
 urllib3
+mysql-connector-python
