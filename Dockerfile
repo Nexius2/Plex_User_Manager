@@ -1,5 +1,6 @@
-FROM ubuntu:20.04
+FROM ubuntu:latest
 COPY . /
+ENV LANG C.UTF-8
 RUN echo "**** install system packages ****" \
  && apt-get update \
  && apt-get upgrade -y --no-install-recommends \
