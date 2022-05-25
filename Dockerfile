@@ -1,14 +1,14 @@
-FROM python:3.9-slim
-ENV TINI_VERSION v0.19.0
+FROM ubuntu:20.04
 COPY . /
 RUN echo "**** install system packages ****" \
  && apt-get update \
  && apt-get upgrade -y --no-install-recommends \
- && apt-get install -y tzdata --no-install-recommends \
+ && apt-get install python3 python3-pip \
+ && pip install plexapi \
+ && pip install mysql-connector-python \
  && apt-get install -y gcc g++ libxml2-dev libxslt-dev libz-dev wget \
- && wget -O /tini https://github.com/krallin/tini/releases/download/${TINI_VERSION}/tini-"$(dpkg --print-architecture | awk -F- '{ print $NF }')" \
+ && sudo apt install mysql-server \
  && wget https://raw.githubusercontent.com/blacktwin/JBOPS/master/utility/plex_api_share.py
- && chmod +x /tini \
  && pip3 install --no-cache-dir --upgrade --requirement /requirements.txt \
  && apt-get --purge autoremove wget gcc g++ libxml2-dev libxslt-dev libz-dev -y \
  && apt-get clean \
