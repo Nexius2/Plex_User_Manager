@@ -3,11 +3,7 @@ COPY . /
 RUN echo "**** install system packages ****" \
  && apt-get update \
  && apt-get upgrade -y --no-install-recommends \
- && apt-get install python3 python3-pip \
- && pip install plexapi \
- && pip install mysql-connector-python \
- && apt-get install -y gcc g++ libxml2-dev libxslt-dev libz-dev wget \
- && sudo apt install mysql-server \
+ && apt-get install -y gcc g++ libxml2-dev libxslt-dev libz-dev python3 python3-pip mysql-server wget \
  && wget https://raw.githubusercontent.com/blacktwin/JBOPS/master/utility/plex_api_share.py \
  && pip3 install --no-cache-dir --upgrade --requirement /requirements.txt \
  && apt-get --purge autoremove wget gcc g++ libxml2-dev libxslt-dev libz-dev -y \
