@@ -13,5 +13,6 @@ RUN echo "**** install system packages ****" \
  && apt-get -f install \
  && apt-get autoclean \
  && rm -rf /requirements.txt /tmp/* /var/tmp/* /var/lib/apt/lists/*
-VOLUME /config
-ENTRYPOINT ["/tini", "-s", "python3", "pum.sh", "--"]
+ENTRYPOINT ["python3"]
+# run script 
+CMD ["/bin/bash", "pum.sh"]
