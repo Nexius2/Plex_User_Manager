@@ -7,7 +7,7 @@ ENV LANG C.UTF-8
 RUN echo "**** install system packages ****" \
  && apt-get update \
  && apt-get upgrade -y --no-install-recommends \
- && apt-get install -y python3 python3-pip mysql-server wget \
+ && apt-get install -y python3 python3-pip python3-tk mysql-server wget \
  && wget https://raw.githubusercontent.com/blacktwin/JBOPS/master/utility/plex_api_share.py \
  && pip3 install --no-cache-dir --upgrade --requirement /requirements.txt \
  && apt-get clean \
