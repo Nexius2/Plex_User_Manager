@@ -45,20 +45,47 @@ def validate_string(val):
 con = pymysql.connect(host = db_host,user = db_user,passwd = db_passwd,db = db_db)
 cursor = con.cursor()
 
-#delete old table
-sql_delete = "TRUNCATE TABLE plexusers"
-cursor.execute(sql_delete)
+#set is_on_plex to null
+sql_plexusers_is_on_plex_reset = "UPDATE plexusers SET is_on_plex = 0;"
+cursor.execute(sql_plexusers_is_on_plex_reset,)
 
+#remove not wanted characters
 for mydict in json_obj:
     placeholders = ', '.join(['%s'] * len(mydict))
-    #print(mydict)
     columns = ', '.join("`" + str(x).replace('/', '_') + "`" for x in mydict.keys())
-    #mydict["sections"] = 
     values = ', '.join("'" + str(x).replace('/', '_') + "'" for x in mydict.values())
-    values = ', '.join("'" + str(x).replace("'", '') + "'" for x in mydict.values())
-    #print(values)
-    sql = "INSERT INTO %s ( %s ) VALUES ( %s );" % ('plexusers', columns, values)
-    cursor.execute(sql,)
+    sections = ', '.join("'" + str(x).replace('/', '_') + "'" for x in mydict['sections'])
+    sections = sections.replace("'", '')
+    sections = sections.replace(",", ' &')
+
+    #add plex userID info to plexusers db
+    sql_plexusers_import = "INSERT IGNORE INTO plexusers ( userID, account_creation_date ) VALUES ( %s, CURDATE() );" % (mydict['userID'])
+    cursor.execute(sql_plexusers_import,)
+    #update plex user info to plexusers db
+    sql_plexusers_import2 = "UPDATE %s SET username = '%s', email = '%s', serverName = '%s', allowSync = '%s', camera = '%s', channels = '%s', filterMovies = '%s', filterMusic = '%s', filterTelevision = '%s', title = '%s', sections = '%s' WHERE userID = '%s';" % ('plexusers', mydict['username'], mydict['email'], mydict['serverName'], mydict['allowSync'], mydict['camera'], mydict['channels'], mydict['filterMovies'], mydict['filterMusic'], mydict['filterTelevision'], mydict['title'], sections, mydict['userID'])
+    cursor.execute(sql_plexusers_import2,)
+    #set is_on_plex to 1 if user is on plex export
+    sql_plexusers_is_on_plex_set = "UPDATE plexusers SET is_on_plex = 1 WHERE userID = %s;" % (mydict['userID'])
+    cursor.execute(sql_plexusers_is_on_plex_set,)
+
+#remove user with is_on_plex = null
+sql_plexusers_remove_old_accounts = "DELETE FROM plexusers WHERE is_on_plex = 0;"
+cursor.execute(sql_plexusers_remove_old_accounts)
+
+#select all expired users
+sql_plexusers_expired_account = "SELECT userID FROM plexusers WHERE ISNULL(account_expire_date) = 0 AND DATEDIFF (CURDATE(),account_expire_date) > 0;"
+cursor.execute(sql_plexusers_expired_account)
+results = cursor.fetchall()
+print(results)
+#for all results run plex_api_share.py --unshare --user USER
+#send mail to warn account has ended
+
+#warn all soon expired users
+sql_plexusers_expired_account = "SELECT userID FROM plexusers WHERE ISNULL(account_expire_date) = 0 AND DATEDIFF (CURDATE(),account_expire_date) < 30;"
+cursor.execute(sql_plexusers_expired_account)
+results = cursor.fetchall()
+print(results)
+#for all results send mail to warn account is about to end
 
 #close connexion
 con.commit()
