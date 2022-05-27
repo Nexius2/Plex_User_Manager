@@ -38,10 +38,10 @@ select_plex_users = """SELECT * FROM plexusers"""
 cursor = con.cursor()
 cursor.execute(select_plex_users)
 result = cursor.fetchall()
-
+print(result)
 p = []
 
-tbl = "<tr><td>ID</td><td>username</td><td>Email</td><td>sections</td><td>serverName</td><td>allowSync</td><td>camera</td><td>channels</td><td>filterMovies</td><td>filterMusic</td><td>filterTelevision</td><td>title</td></tr>"
+tbl = "<tr><td>ID</td><td>username</td><td>Email</td><td>sections</td><td>serverName</td><td>allowSync</td><td>camera</td><td>channels</td><td>filterMovies</td><td>filterMusic</td><td>filterTelevision</td><td>title</td><td>account creation date</td><td>account expiration date</td></tr>"
 #"<tr><td><th>ID</th></td><td><th>username</th></td><td><th>Email</th></td><td><th>sections</th></td><td><th>serverName</th></td><td><th>allowSync</th></td><td><th>camera</th></td><td><th>channels</th></td><td><th>filterMovies</th></td><td><th>filterMusic</th></td><td><th>filterTelevision</th></td><td><th>title</th></td></tr>"
 p.append(tbl)
 
@@ -68,8 +68,12 @@ for row in result:
     p.append(j)
     k = "<td>%s</td>"%row[10]
     p.append(k)
-    l= "<td>%s</td></tr>"%row[11]
+    l= "<td>%s</td>"%row[11]
     p.append(l)
+    m= "<td>%s</td>"%row[13]
+    p.append(m)
+    n= "<td>%s</td></tr>"%row[15]
+    p.append(n)
 
 
 contents = '''<!DOCTYPE html PUBLIC "-//W3C//DTD HTML 4.01 Transitional//EN">
