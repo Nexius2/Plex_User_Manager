@@ -7,4 +7,4 @@ python3 plex_api_share.py --backup
 python3 import_plex_users.py
 
 #generate web page
-python3 pum_web.py
+python3 pum_gui.py
