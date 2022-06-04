@@ -1,10 +1,10 @@
-FROM python:3.9-slim
+FROM ubuntu:latest
 ENV TINI_VERSION v0.19.0
 LABEL maintainer="Nexius2" \
       name="plex_user_manager" \
       version="0.2"
 COPY . /
-ENV LANG C.UTF-8
+ENV TZ=Europe/Minsk
 RUN echo "**** install system packages ****" \
  && apt-get update \
  && apt-get upgrade -y --no-install-recommends \
@@ -17,6 +17,6 @@ RUN echo "**** install system packages ****" \
  && apt-get -f install \
  && apt-get autoclean \
  && rm -rf /requirements.txt /tmp/* /var/tmp/* /var/lib/apt/lists/*
-ENTRYPOINT ["/tini", "-s", "python3", "pum_web.py", "--"]
+ENTRYPOINT ["python3", "pum_web.py"]
 # run script 
 CMD ["/bin/bash", "pum.sh"]
