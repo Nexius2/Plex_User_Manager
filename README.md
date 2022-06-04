@@ -18,3 +18,7 @@ bugs:
 - dockerfile asking for geographic area
 
 
+Usage:
+add plex url and token in .config/plexapi/config.ini
+run pum.sh (or python3 plex_api_share.py --backup then python3 import_plex_users.py)
+run python3 pum_web.py
