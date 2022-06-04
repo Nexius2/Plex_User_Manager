@@ -6,6 +6,7 @@ LABEL maintainer="Nexius2" \
 COPY . /
 ENV TZ=Europe/Minsk
 RUN echo "**** install system packages ****" \
+ && DEBIAN_FRONTEND=noninteractive TZ=Etc/UTC apt-get -y install tzdata
  && apt-get update \
  && apt-get upgrade -y --no-install-recommends \
  && apt-get install -y python3 python3-pip python3-tk mysql-server wget \
