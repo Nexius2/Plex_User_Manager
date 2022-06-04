@@ -14,5 +14,6 @@ bugs:
 - can't update user when one of the date is missing
 - when updating user, main_fram does'nt update correctly
 - in some cases forbiden entry box are white
+- dockerfile asking for geographic area
 
 
