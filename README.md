@@ -9,6 +9,7 @@ left to do:
 - in conf tab add mail conf to send mail before , when, and after account has expired
 - in conf tab add cron option to sync plex db
 - refresh main frame after each cron sync
+- build docker container to run plex sync every cron schedule, display pum_web.py and ask for plex url and token (config.ini)
 
 bugs:
 - can't update user when one of the date is missing
