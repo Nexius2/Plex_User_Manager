@@ -1,6 +1,8 @@
 # Plex_User_Manager
 
-starting a tool to manage my plex users because I can't make the difference between all of them now plex has decided to rename them
+starting a tool to manage plex users because we can't make the difference between all of them now plex has decided to rename them. 
+Also adding access expiration to stop user access when date passed.
+I'd be glad to have some help with python and docker.
 
 left to do:
 - add pum_userID column and make it primary
