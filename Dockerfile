@@ -1,10 +1,9 @@
 FROM ubuntu:latest
-ENV TINI_VERSION v0.19.0
 LABEL maintainer="Nexius2" \
       name="plex_user_manager" \
       version="0.2"
 COPY . /
-ENV TZ=Europe/Minsk
+ENV TZ=Europe/Paris
 ARG DEBIAN_FRONTEND=noninteractive
 RUN echo "**** install system packages ****" \
  && apt-get update \
