@@ -7,8 +7,24 @@ root = Tk()
 root.title('Plex User Manager')
 root.geometry("1000x700")
 
-#reset var
-#username_inf = ''
+# Configure the root color
+root.configure(background="#1F1F1F")
+
+# set tabs
+notebook = ttk.Notebook(root)
+Home_tab = Frame(notebook)  # frame for home page
+conf_tab = Frame(notebook)  # frame for conf page
+
+notebook.add(Home_tab, text="Home")
+notebook.add(conf_tab, text="conf")
+
+Home_tab.configure(background="#1F1F1F")
+conf_tab.configure(background="#1F1F1F")
+
+notebook.pack(expand=True, fill="both")  # expand to space not used
+
+# reset var
+# username_inf = ''
 
 # Read config.ini file
 config_object = ConfigParser()
@@ -89,11 +105,13 @@ def query_user_info():
 
     for record in records:
         if count % 2 == 0:
-            my_tree.insert(parent='', index='end', iid=count, text='',
+            #my_tree.insert(parent='', index='end', iid=count, text='',
+            my_tree.insert(parent='', index='end', iid=str(count), text='',
                            values=(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7], record[8], record[9], record[10], record[11], record[12], record[13], record[14], record[15], record[16], record[17], record[18]),
                            tags=('evenrow',))
         else:
-            my_tree.insert(parent='', index='end', iid=count, text='',
+            #my_tree.insert(parent='', index='end', iid=count, text='',
+            my_tree.insert(parent='', index='end', iid=str(count), text='',
                            values=(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7], record[8], record[9], record[10], record[11], record[12], record[13], record[14], record[15], record[16], record[17], record[18]),
                            tags=('oddrow',))
         # increment counter
@@ -109,8 +127,7 @@ style = ttk.Style()
 # Pick A Theme
 style.theme_use('default')
 
-# Configure the root color
-root.configure(background="#1F1F1F")
+
 
 # Configure the Treeview Colors
 style.configure("Treeview",
@@ -237,49 +254,49 @@ def select_record(e):
         first_name_entry.insert(0, values[0])
         last_name_entry.insert(0, values[1])
         username_entry.insert(0, values[2])
-        username_entry.config(state="disable",
+        username_entry.config(state="disabled",
                               disabledbackground="#282828")
         email_entry.insert(0, values[3])
-        email_entry.config(state="disable",
+        email_entry.config(state="disabled",
                            disabledbackground="#282828")
         serverName_entry.insert(0, values[4])
-        serverName_entry.config(state="disable",
+        serverName_entry.config(state="disabled",
                                 disabledbackground="#282828")
         account_expire_date_entry.insert(0, values[5])
         sections_entry.insert(0, values[6])
-        sections_entry.config(state="disable",
+        sections_entry.config(state="disabled",
                               disabledbackground="#282828")
         allowSync_entry.insert(0, values[7])
-        allowSync_entry.config(state="disable",
+        allowSync_entry.config(state="disabled",
                                disabledbackground="#282828")
         camera_entry.insert(0, values[8])
-        camera_entry.config(state="disable",
+        camera_entry.config(state="disabled",
                             disabledbackground="#282828")
         channels_entry.insert(0, values[9])
-        channels_entry.config(state="disable",
+        channels_entry.config(state="disabled",
                               disabledbackground="#282828")
         filterMovies_entry.insert(0, values[10])
-        filterMovies_entry.config(state="disable",
+        filterMovies_entry.config(state="disabled",
                                   disabledbackground="#282828")
         filterMusic_entry.insert(0, values[11])
-        filterMusic_entry.config(state="disable",
+        filterMusic_entry.config(state="disabled",
                                  disabledbackground="#282828")
         filterTelevision_entry.insert(0, values[12])
-        filterTelevision_entry.config(state="disable",
+        filterTelevision_entry.config(state="disabled",
                                       disabledbackground="#282828")
         title_entry.insert(0, values[13])
-        title_entry.config(state="disable",
+        title_entry.config(state="disabled",
                            disabledbackground="#282828")
         userID_entry.insert(0, values[17])
-        userID_entry.config(state="disable",
+        userID_entry.config(state="disabled",
                             disabledbackground="#282828")
         account_creation_date_entry.insert(0, values[15])
         account_renewed_date_entry.insert(0, values[16])
-        #userID_entry.insert(0, values[17])
+        # userID_entry.insert(0, values[17])
         description_entry.insert(0, values[18])
-        #print(values)
-        #print(values[2])
-        #username_inf = (values[2])
+        # print(values)
+        # print(values[2])
+        # username_inf = (values[2])
 
 # Update Record
 def update_record():
@@ -290,7 +307,7 @@ def update_record():
         first_name = first_name_entry.get()
         if first_name is None:
             first_name = ''
-        #rint(first_name)
+        # print(first_name)
         last_name = last_name_entry.get()
         if last_name is None:
             last_name = ''
@@ -300,7 +317,7 @@ def update_record():
         id_value = userID_entry.get()
         # SQL command
         sql3 = """UPDATE plexusers SET first_name = %s, last_name = %s, account_creation_date = %s, account_renewed_date = %s, account_expire_date = %s, description = %s WHERE userID = %s;"""
-        #print(first_name)
+        # print(first_name)
         inputs = (first_name, last_name, description, id_value)
         print(inputs)
         # Read config.ini file
@@ -350,12 +367,12 @@ def update_record():
 
         if not account_expire_date_entry.get() or account_expire_date_entry.get() == "None":
             inputs_account_expire_date = "NULL"
-            #print(account_expire_date)
+            # print(account_expire_date)
         else:
-            #sql_account_expire_datee = """UPDATE plexusers SET account_expire_date = %s;"""
+            # sql_account_expire_datee = """UPDATE plexusers SET account_expire_date = %s;"""
             inputs_account_expire_date = (account_expire_date_entry.get())
-            #print(inputs_account_expire_date)
-            #cursor.execute(sql_account_expire_datee, inputs_account_expire_date)
+            # print(inputs_account_expire_date)
+            # cursor.execute(sql_account_expire_datee, inputs_account_expire_date)
 
         print(id_value)
         print(first_name_entry.get())
@@ -379,7 +396,7 @@ def update_record():
                            inputs_account_expire_date,
                            id_value
                        ])
-        #cursor.execute(sql3, inputs)
+        # cursor.execute(sql3, inputs)
         # Commit changes
         mydb.commit()
         # Close connexion
@@ -427,11 +444,13 @@ data_frame.pack(fill="x", expand="yes", padx=20)
 data_frame.configure(background="#282828",
                      foreground="white")
 # Configure the LabelFrame button color
-#data_frame.configure("LabelFrame",
+# data_frame.configure("LabelFrame",
 #                background="#282828",
 #                foreground="white")
                 #rowheight=25,
                 #fieldbackground="#D3D3D3")
+
+
 
 first_name_label = Label(data_frame, text="First Name")
 first_name_label.grid(row=0, column=0, padx=10, pady=10)
@@ -454,7 +473,7 @@ username_label.config(background="#282828",
 username_entry = Entry(data_frame)
 username_entry.grid(row=0, column=5, padx=10, pady=10)
 username_entry.config(disabledbackground="#282828",
-                        state="disable")
+                        state="disabled")
 
 email_label = Label(data_frame, text="email")
 email_label.grid(row=1, column=0, padx=10, pady=10)
@@ -463,7 +482,7 @@ email_label.config(background="#282828",
 email_entry = Entry(data_frame)
 email_entry.grid(row=1, column=1, padx=10, pady=10)
 email_entry.config(disabledbackground="#282828",
-                   state="disable")
+                   state="disabled")
 
 serverName_label = Label(data_frame, text="serverName")
 serverName_label.grid(row=1, column=2, padx=10, pady=10)
@@ -472,7 +491,7 @@ serverName_label.config(background="#282828",
 serverName_entry = Entry(data_frame)
 serverName_entry.grid(row=1, column=3, padx=10, pady=10)
 serverName_entry.config(disabledbackground="#282828",
-                        state="disable")
+                        state="disabled")
 
 account_expire_date_label = Label(data_frame, text="expire date")
 account_expire_date_label.grid(row=2, column=4, padx=10, pady=10)
@@ -488,7 +507,7 @@ zipcode_label.config(background="#282828",
 sections_entry = Entry(data_frame)
 sections_entry.grid(row=3, column=1, padx=10, pady=10)
 sections_entry.config(disabledbackground="#282828",
-                      state="disable")
+                      state="disabled")
 
 title_label = Label(data_frame, text="title")
 title_label.grid(row=3, column=2, padx=10, pady=10)
@@ -497,7 +516,7 @@ title_label.config(background="#282828",
 title_entry = Entry(data_frame)
 title_entry.grid(row=3, column=3, padx=10, pady=10)
 title_entry.config(disabledbackground="#282828",
-                   state="disable")
+                   state="disabled")
 
 userID_label = Label(data_frame, text="userID")
 userID_label.grid(row=3, column=4, padx=10, pady=10)
@@ -506,13 +525,13 @@ userID_label.config(background="#282828",
 userID_entry = Entry(data_frame)
 userID_entry.grid(row=3, column=5, padx=10, pady=10)
 userID_entry.config(disabledbackground="#282828",
-                    state="disable")
+                    state="disabled")
 
 account_creation_date_label = Label(data_frame, text="account_creation_date")
 account_creation_date_label.grid(row=2, column=0, padx=10, pady=10)
 account_creation_date_label.config(background="#282828",
                         foreground="white")
-global account_creation_date_entry
+# global account_creation_date_entry
 account_creation_date_entry = Entry(data_frame)
 account_creation_date_entry.grid(row=2, column=1, padx=10, pady=10)
 
@@ -537,7 +556,7 @@ allowSync_label.config(background="#282828",
 allowSync_entry = Entry(data_frame)
 allowSync_entry.grid(row=4, column=1, padx=10, pady=10)
 allowSync_entry.config(disabledbackground="#282828",
-                       state="disable")
+                       state="disabled")
 
 camera_label = Label(data_frame, text="camera")
 camera_label.grid(row=4, column=2, padx=10, pady=10)
@@ -546,7 +565,7 @@ camera_label.config(background="#282828",
 camera_entry = Entry(data_frame)
 camera_entry.grid(row=4, column=3, padx=10, pady=10)
 camera_entry.config(disabledbackground="#282828",
-                    state="disable")
+                    state="disabled")
 
 channels_label = Label(data_frame, text="channels")
 channels_label.grid(row=4, column=4, padx=10, pady=10)
@@ -555,7 +574,7 @@ channels_label.config(background="#282828",
 channels_entry = Entry(data_frame)
 channels_entry.grid(row=4, column=5, padx=10, pady=10)
 channels_entry.config(disabledbackground="#282828",
-                      state="disable")
+                      state="disabled")
 
 filterMovies_label = Label(data_frame, text="filterMovies")
 filterMovies_label.grid(row=5, column=0, padx=10, pady=10)
@@ -564,7 +583,7 @@ filterMovies_label.config(background="#282828",
 filterMovies_entry = Entry(data_frame)
 filterMovies_entry.grid(row=5, column=1, padx=10, pady=10)
 filterMovies_entry.config(disabledbackground="#282828",
-                          state="disable")
+                          state="disabled")
 
 filterMusic_label = Label(data_frame, text="filterMusic")
 filterMusic_label.grid(row=5, column=2, padx=10, pady=10)
@@ -573,7 +592,7 @@ filterMusic_label.config(background="#282828",
 filterMusic_entry = Entry(data_frame)
 filterMusic_entry.grid(row=5, column=3, padx=10, pady=10)
 filterMusic_entry.config(disabledbackground="#282828",
-                         state="disable")
+                         state="disabled")
 
 filterTelevision_label = Label(data_frame, text="filterTelevision")
 filterTelevision_label.grid(row=5, column=4, padx=10, pady=10)
@@ -582,7 +601,7 @@ filterTelevision_label.config(background="#282828",
 filterTelevision_entry = Entry(data_frame)
 filterTelevision_entry.grid(row=5, column=5, padx=10, pady=10)
 filterTelevision_entry.config(disabledbackground="#282828",
-                              state="disable")
+                              state="disabled")
 
 update_button = Button(data_frame, text="Update Record", command=update_record)
 update_button.grid(row=6, column=0, padx=10, pady=10)
@@ -606,31 +625,6 @@ user_count_result_label.grid(row=0, column=1)
 user_count_result_label.config(background="#282828",
                         foreground="white")
 
-'''
-update_button = Button(button_frame, text="Update Record", command=update_record)
-update_button.grid(row=0, column=0, padx=10, pady=10)
-
-add_button = Button(button_frame, text="Add Record")
-add_button.grid(row=0, column=1, padx=10, pady=10)
-
-remove_all_button = Button(button_frame, text="Remove All Records")
-remove_all_button.grid(row=0, column=2, padx=10, pady=10)
-
-remove_one_button = Button(button_frame, text="Remove One Selected")
-remove_one_button.grid(row=0, column=3, padx=10, pady=10)
-
-remove_many_button = Button(button_frame, text="Remove Many Selected")
-remove_many_button.grid(row=0, column=4, padx=10, pady=10)
-
-move_up_button = Button(button_frame, text="Move Up")
-move_up_button.grid(row=0, column=5, padx=10, pady=10)
-
-move_down_button = Button(button_frame, text="Move Down")
-move_down_button.grid(row=0, column=6, padx=10, pady=10)
-
-select_record_button = Button(button_frame, text="Select Record", command=select_record)
-select_record_button.grid(row=0, column=7, padx=10, pady=10)
-'''
 
 # Bind the treeview
 my_tree.bind("<ButtonRelease-1>", select_record)
