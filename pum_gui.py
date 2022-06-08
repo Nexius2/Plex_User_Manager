@@ -4,22 +4,55 @@ from configparser import ConfigParser
 import mysql.connector
 
 root = Tk()
-root.title('Plex User Manager v0.2')
+root.title('Plex User Manager v0.21')
 root.geometry("1000x700")
 
 # Configure the root color
-root.configure(background="#1F1F1F")
+# root.configure(background="#1F1F1F")
 
+# tabs_frame = Frame(root)
+# tabs_frame.pack()
+# style = ttk.Style(tabs_frame)
+style = ttk.Style(root)
+
+style.theme_create("pum_theme", parent="alt", settings={
+        "TNotebook": {"configure": {"tabmargins": [2, 5, 2, 0],
+                                    "tabposition": 'ne',
+                                    "background": "#1F1F1F",
+                                    "borderwidth": "0",
+                                    }},
+        "TNotebook.Tab": {
+            "configure": {"padding": [50, 1], "background": "#1F1F1F",
+                                              "foreground": "white",
+                                              "borderwidth": "0"},
+            "map":       {"background": [("selected", "#383838")],
+                          "foreground": [('selected', "#e5a00d")],
+                          "borderwidth": "0",
+                          "expand": [("selected", [1, 1, 1, 0])]}}})
+
+
+style.theme_use("pum_theme")
+
+# tabs_frame.configure(background="#1F1F1F")
 # set tabs
-notebook = ttk.Notebook(root)
-Home_tab = Frame(notebook)  # frame for home page
-conf_tab = Frame(notebook)  # frame for conf page
+# notebook = ttk.Notebook(tabs_frame, style='TNotebook')
+notebook = ttk.Notebook(root, style='TNotebook')
 
-notebook.add(Home_tab, text="Home")
+home_tab: Frame = Frame(notebook)  # frame for home page
+conf_tab: Frame = Frame(notebook)  # frame for conf page
+
+notebook.add(home_tab, text="Home")
 notebook.add(conf_tab, text="conf")
 
-Home_tab.configure(background="#1F1F1F")
+home_tab.configure(background="#1F1F1F")
 conf_tab.configure(background="#1F1F1F")
+# background = "#D3D3D3",
+# foreground = "white",
+# rowheight = 25,
+# fieldbackground = "#D3D3D3")
+# background=[('selected', "#383838")],
+# font=[('selected', "bold")],
+# foreground=[('selected', "#e5a00d")])
 
 notebook.pack(expand=True, fill="both")  # expand to space not used
 
@@ -105,12 +138,12 @@ def query_user_info():
 
     for record in records:
         if count % 2 == 0:
-            #my_tree.insert(parent='', index='end', iid=count, text='',
+            # my_tree.insert(parent='', index='end', iid=count, text='',
             my_tree.insert(parent='', index='end', iid=str(count), text='',
                            values=(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7], record[8], record[9], record[10], record[11], record[12], record[13], record[14], record[15], record[16], record[17], record[18]),
                            tags=('evenrow',))
         else:
-            #my_tree.insert(parent='', index='end', iid=count, text='',
+            # my_tree.insert(parent='', index='end', iid=count, text='',
             my_tree.insert(parent='', index='end', iid=str(count), text='',
                            values=(record[0], record[1], record[2], record[3], record[4], record[5], record[6], record[7], record[8], record[9], record[10], record[11], record[12], record[13], record[14], record[15], record[16], record[17], record[18]),
                            tags=('oddrow',))
@@ -122,10 +155,10 @@ def query_user_info():
     mydb.close()
 
 # Add Some Style
-style = ttk.Style()
+# style = ttk.Style()
 
 # Pick A Theme
-style.theme_use('default')
+# style.theme_use('default')
 
 
 
@@ -144,7 +177,7 @@ style.map('Treeview',
 
 
 # Create a Treeview Frame
-tree_frame = Frame(root)
+tree_frame = Frame(home_tab)
 tree_frame.pack(pady=10)
 
 # Create a Treeview Scrollbar
@@ -437,7 +470,7 @@ my_tree.tag_configure('evenrow', background="#2B2B2B")
 
 
 # Add Record Entry Boxes
-data_frame = LabelFrame(root, text="User information")
+data_frame = LabelFrame(home_tab, text="User information")
 data_frame.pack(fill="x", expand="yes", padx=20)
 
 # Configure the data_frame color
@@ -609,7 +642,7 @@ update_button.grid(row=6, column=0, padx=10, pady=10)
 
 
 # Add Buttons
-button_frame = LabelFrame(root, text="Plex Information")
+button_frame = LabelFrame(home_tab, text="Plex Information")
 button_frame.pack(fill="x", expand="yes", padx=20)
 
 # Configure the button_frame color
@@ -624,6 +657,22 @@ user_count_result_label = Label(button_frame, text=user_count_result)
 user_count_result_label.grid(row=0, column=1)
 user_count_result_label.config(background="#282828",
                         foreground="white")
+
+# conf frame
+conf_frame = LabelFrame(conf_tab)
+conf_frame.configure(background="#1F1F1F", border="0")
+conf_frame.pack(padx=20, anchor="w")
+
+# conf_tab page
+warning_conf_label_var = IntVar()
+Checkbutton(conf_frame, text="warn users of account expiration", variable=warning_conf_label_var, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white").grid(row=0, column=0, padx=10, pady=10)
+
+delete_user_conf_var = IntVar()
+Checkbutton(conf_frame, text="delete user access is account expired", variable=delete_user_conf_var, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white").grid(row=1, column=0, padx=10, pady=10)
+
+test_label_var = IntVar()
+Checkbutton(conf_frame, text="test for something else", variable=test_label_var, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white").grid(row=2, column=0, padx=10, pady=10)
+
 
 
 # Bind the treeview
