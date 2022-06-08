@@ -4,7 +4,7 @@ from configparser import ConfigParser
 import mysql.connector
 
 root = Tk()
-root.title('Plex User Manager')
+root.title('Plex User Manager v0.2')
 root.geometry("1000x700")
 
 # Configure the root color
