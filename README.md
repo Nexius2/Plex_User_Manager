@@ -13,11 +13,8 @@ left to do:
 - build docker container to run plex sync every cron schedule, display pum_web.py and ask for plex url and token (config.ini)
 
 bugs:
-- when updating user, main_fram doesn't update correctly
-- in some cases forbiden entry box are white
 - checkbox not aligned in conf tab
 - when selecting help & info selection touring appears (focus)
-- can't edit twice a user
 
 Usage:
  - add plex url and token in .config/plexapi/config.ini
