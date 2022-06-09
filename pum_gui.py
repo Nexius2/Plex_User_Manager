@@ -1,10 +1,10 @@
 from tkinter import *
 from tkinter import ttk
 from configparser import ConfigParser
-import mysql.connector
+import mysql.connector, os
 
 root = Tk()
-root.title('Plex User Manager v0.21')
+root.title('Plex User Manager')
 root.geometry("1000x700")
 
 # Configure the root color
@@ -22,42 +22,32 @@ style.theme_create("pum_theme", parent="alt", settings={
                                     "borderwidth": "0",
                                     }},
         "TNotebook.Tab": {
-            "configure": {"padding": [50, 1], "background": "#1F1F1F",
+            "configure": {"padding": [30, 1], "background": "#1F1F1F",
                                               "foreground": "white",
                                               "borderwidth": "0"},
             "map":       {"background": [("selected", "#383838")],
                           "foreground": [('selected', "#e5a00d")],
-                          "borderwidth": "0",
-                          "expand": [("selected", [1, 1, 1, 0])]}}})
+                          "borderwidth": "0"}}})
 
 
 style.theme_use("pum_theme")
 
-# tabs_frame.configure(background="#1F1F1F")
 # set tabs
-# notebook = ttk.Notebook(tabs_frame, style='TNotebook')
 notebook = ttk.Notebook(root, style='TNotebook')
 
 home_tab: Frame = Frame(notebook)  # frame for home page
 conf_tab: Frame = Frame(notebook)  # frame for conf page
+help_and_info_tab: Frame = Frame(notebook)  # frame for help & info page
 
 notebook.add(home_tab, text="Home")
-notebook.add(conf_tab, text="conf")
+notebook.add(conf_tab, text="Conf")
+notebook.add(help_and_info_tab, text="Help & info")
 
 home_tab.configure(background="#1F1F1F")
 conf_tab.configure(background="#1F1F1F")
-# background = "#D3D3D3",
-# foreground = "white",
-# rowheight = 25,
-# fieldbackground = "#D3D3D3")
-# background=[('selected', "#383838")],
-# font=[('selected', "bold")],
-# foreground=[('selected', "#e5a00d")])
+help_and_info_tab.configure(background="#1F1F1F")
 
 notebook.pack(expand=True, fill="both")  # expand to space not used
-
-# reset var
-# username_inf = ''
 
 # Read config.ini file
 config_object = ConfigParser()
@@ -159,7 +149,6 @@ def query_user_info():
 
 # Pick A Theme
 # style.theme_use('default')
-
 
 
 # Configure the Treeview Colors
@@ -276,8 +265,6 @@ def select_record(e):
         #userID_entry.delete(0, END)
         description_entry.delete(0, END)
 
-
-
         # Grab record number
         selected = my_tree.focus()
         # Grab record values
@@ -327,9 +314,7 @@ def select_record(e):
         account_renewed_date_entry.insert(0, values[16])
         # userID_entry.insert(0, values[17])
         description_entry.insert(0, values[18])
-        # print(values)
-        # print(values[2])
-        # username_inf = (values[2])
+
 
 # Update Record
 def update_record():
@@ -352,7 +337,7 @@ def update_record():
         sql3 = """UPDATE plexusers SET first_name = %s, last_name = %s, account_creation_date = %s, account_renewed_date = %s, account_expire_date = %s, description = %s WHERE userID = %s;"""
         # print(first_name)
         inputs = (first_name, last_name, description, id_value)
-        print(inputs)
+        #print(inputs)
         # Read config.ini file
         config_object = ConfigParser()
         config_object.read(".config/pum.ini")
@@ -371,46 +356,21 @@ def update_record():
             auth_plugin='mysql_native_password')
         # Create a cursor and initialize it
         cursor = mydb.cursor()
-        '''
+
         # test for blank date
         if not account_creation_date_entry.get() or account_creation_date_entry.get() == "None":
-            account_creation_date = "NULL"
-            print(account_creation_date)
+            account_creation_date = "0000-00-00"
         else:
-            #sql_account_creation_date = """UPDATE plexusers SET account_creation_date = %s;"""
-            inputs_account_creation_date = (account_creation_date_entry.get(), )
-            #print(type(inputs_account_creation_date[0]))
-            #print(type(inputs_account_creation_date))
-            #print(inputs_account_creation_date)
-            #print(type(inputs_account_creation_date))
-            #print(inputs_account_creation_date)
-            print(inputs_account_creation_date)
-            #cursor.execute(sql_account_creation_date, (inputs_account_creation_date[0],) )
-            #cursor.execute(sql_account_creation_date, [inputs_account_creation_date[0]])
-            #cursor.execute("UPDATE plexusers SET account_creation_date = %s", inputs_account_creation_date[0])
+            account_creation_date = (account_creation_date_entry.get())
         if not account_renewed_date_entry.get() or account_renewed_date_entry.get() == "None":
-            account_renewed_date = "NULL"
-            print(account_renewed_date)
+            account_renewed_date = "0000-00-00"
         else:
-            sql_account_renewed_date = """UPDATE plexusers SET account_renewed_date = %s;"""
-            inputs_account_renewed_date = (account_renewed_date_entry.get())
-            print(inputs_account_renewed_date)
-            #cursor.execute(sql_account_renewed_date, inputs_account_renewed_date)
-            '''
-
+            account_renewed_date = (account_renewed_date_entry.get())
         if not account_expire_date_entry.get() or account_expire_date_entry.get() == "None":
-            inputs_account_expire_date = "NULL"
-            # print(account_expire_date)
+            account_expire_date = "0000-00-00"
         else:
-            # sql_account_expire_datee = """UPDATE plexusers SET account_expire_date = %s;"""
-            inputs_account_expire_date = (account_expire_date_entry.get())
-            # print(inputs_account_expire_date)
-            # cursor.execute(sql_account_expire_datee, inputs_account_expire_date)
+            account_expire_date = (account_expire_date_entry.get())
 
-        print(id_value)
-        print(first_name_entry.get())
-        print(last_name_entry.get())
-        print(description_entry.get())
         cursor.execute("""UPDATE plexusers SET
         		first_name = %s,
         		last_name = %s,
@@ -424,9 +384,9 @@ def update_record():
                            first_name_entry.get(),
                            last_name_entry.get(),
                            description_entry.get(),
-                           account_creation_date_entry.get(),
-                           account_renewed_date_entry.get(),
-                           inputs_account_expire_date,
+                           account_creation_date,
+                           account_renewed_date,
+                           account_expire_date,
                            id_value
                        ])
         # cursor.execute(sql3, inputs)
@@ -434,7 +394,6 @@ def update_record():
         mydb.commit()
         # Close connexion
         mydb.close()
-
 
 # user count
 # Read config.ini file
@@ -467,8 +426,6 @@ mydb.close()
 my_tree.tag_configure('oddrow', background="#303030")
 my_tree.tag_configure('evenrow', background="#2B2B2B")
 
-
-
 # Add Record Entry Boxes
 data_frame = LabelFrame(home_tab, text="User information")
 data_frame.pack(fill="x", expand="yes", padx=20)
@@ -476,14 +433,6 @@ data_frame.pack(fill="x", expand="yes", padx=20)
 # Configure the data_frame color
 data_frame.configure(background="#282828",
                      foreground="white")
-# Configure the LabelFrame button color
-# data_frame.configure("LabelFrame",
-#                background="#282828",
-#                foreground="white")
-                #rowheight=25,
-                #fieldbackground="#D3D3D3")
-
-
 
 first_name_label = Label(data_frame, text="First Name")
 first_name_label.grid(row=0, column=0, padx=10, pady=10)
@@ -533,9 +482,9 @@ account_expire_date_label.config(background="#282828",
 account_expire_date_entry = Entry(data_frame)
 account_expire_date_entry.grid(row=2, column=5, padx=10, pady=10)
 
-zipcode_label = Label(data_frame, text="sections")
-zipcode_label.grid(row=3, column=0, padx=10, pady=10)
-zipcode_label.config(background="#282828",
+sections_label = Label(data_frame, text="sections")
+sections_label.grid(row=3, column=0, padx=10, pady=10)
+sections_label.config(background="#282828",
                         foreground="white")
 sections_entry = Entry(data_frame)
 sections_entry.grid(row=3, column=1, padx=10, pady=10)
@@ -641,19 +590,19 @@ update_button.grid(row=6, column=0, padx=10, pady=10)
 
 
 
-# Add Buttons
-button_frame = LabelFrame(home_tab, text="Plex Information")
-button_frame.pack(fill="x", expand="yes", padx=20)
+# Add plex info frame
+plex_info_frame = LabelFrame(home_tab, text="Plex Information")
+plex_info_frame.pack(fill="x", expand="yes", padx=20)
 
-# Configure the button_frame color
-button_frame.configure(background="#282828",
+# Configure the plex_info_frame color
+plex_info_frame.configure(background="#282828",
                        foreground="white")
 
-user_count_label = Label(button_frame, text="number of users on plex : ")
+user_count_label = Label(plex_info_frame, text="number of users on plex : ")
 user_count_label.grid(row=0, column=0, padx=10, pady=10)
 user_count_label.config(background="#282828",
                         foreground="white")
-user_count_result_label = Label(button_frame, text=user_count_result)
+user_count_result_label = Label(plex_info_frame, text=user_count_result)
 user_count_result_label.grid(row=0, column=1)
 user_count_result_label.config(background="#282828",
                         foreground="white")
@@ -662,18 +611,28 @@ user_count_result_label.config(background="#282828",
 conf_frame = LabelFrame(conf_tab)
 conf_frame.configure(background="#1F1F1F", border="0")
 conf_frame.pack(padx=20, anchor="w")
-
 # conf_tab page
 warning_conf_label_var = IntVar()
 Checkbutton(conf_frame, text="warn users of account expiration", variable=warning_conf_label_var, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white").grid(row=0, column=0, padx=10, pady=10)
-
 delete_user_conf_var = IntVar()
 Checkbutton(conf_frame, text="delete user access is account expired", variable=delete_user_conf_var, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white").grid(row=1, column=0, padx=10, pady=10)
-
 test_label_var = IntVar()
 Checkbutton(conf_frame, text="test for something else", variable=test_label_var, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white").grid(row=2, column=0, padx=10, pady=10)
 
 
+# help & info frame
+help_and_info_tab_frame = LabelFrame(help_and_info_tab)
+help_and_info_tab_frame.configure(background="#1F1F1F", border="0")
+help_and_info_tab_frame.pack(padx=20, anchor="w")
+# help & info page
+# get version number in VERSION file
+with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "VERSION")) as handle:
+    for version in handle.readlines():
+        version = version.strip()
+# display version number
+version_label = Label(help_and_info_tab_frame, text="Version: " + str(version))
+version_label.configure(background="#1F1F1F", border="0", foreground="white")
+version_label.grid(row=0, column=0, padx=10, pady=10)
 
 # Bind the treeview
 my_tree.bind("<ButtonRelease-1>", select_record)
