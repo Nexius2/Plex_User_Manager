@@ -17,6 +17,7 @@ bugs:
 - in some cases forbiden entry box are white
 - checkbox not aligned in conf tab
 - when selecting help & info selection touring appears (focus)
+- can't edit twice a user
 
 Usage:
  - add plex url and token in .config/plexapi/config.ini
