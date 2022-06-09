@@ -1,4 +1,4 @@
-# Plex_User_Manager
+# Plex User Manager
 
 starting a tool to manage plex users because we can't make the difference between all of them now plex has decided to rename them. 
 Also adding access expiration to stop user access when date passed.
