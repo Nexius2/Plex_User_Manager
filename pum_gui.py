@@ -164,7 +164,6 @@ style.map('Treeview',
           #font=[('selected', "bold")],
           foreground=[('selected', "#e5a00d")])
 
-
 # Create a Treeview Frame
 tree_frame = Frame(home_tab)
 tree_frame.pack(pady=10)
@@ -256,6 +255,10 @@ def select_record(e):
                            disabledforeground="white",
                            state="normal")
         title_entry.delete(0, END)
+        is_on_plex_entry.config(disabledbackground="#282828",
+                           disabledforeground="white",
+                           state="normal")
+        is_on_plex_entry.delete(0, END)
         userID_entry.config(disabledbackground="#282828",
                             disabledforeground="white",
                             state="normal")
@@ -307,37 +310,51 @@ def select_record(e):
         title_entry.insert(0, values[13])
         title_entry.config(state="disabled",
                            disabledbackground="#282828")
+        is_on_plex_entry.insert(0, values[14])
+        is_on_plex_entry.config(state="disabled",
+                           disabledbackground="#282828")
+        account_creation_date_entry.insert(0, values[15])
+        account_renewed_date_entry.insert(0, values[16])
         userID_entry.insert(0, values[17])
         userID_entry.config(state="disabled",
                             disabledbackground="#282828")
-        account_creation_date_entry.insert(0, values[15])
-        account_renewed_date_entry.insert(0, values[16])
-        # userID_entry.insert(0, values[17])
         description_entry.insert(0, values[18])
-
 
 # Update Record
 def update_record():
         # Grab the record number
         selected = my_tree.focus()
         # Update record
-        my_tree.item(selected, text="", values=(first_name_entry.get(), last_name_entry.get(), account_creation_date_entry.get(), account_renewed_date_entry.get(), account_expire_date_entry.get(), description_entry.get(),userID_entry.get(),))
-        first_name = first_name_entry.get()
-        if first_name is None:
-            first_name = ''
+        my_tree.item(selected, text="", values=(first_name_entry.get(), last_name_entry.get(), username_entry.get(), email_entry.get(), serverName_entry.get(), account_expire_date_entry.get(), sections_entry.get(), allowSync_entry.get(), camera_entry.get(), channels_entry.get(), filterMovies_entry.get(), filterMusic_entry.get(), filterTelevision_entry.get(), title_entry.get(), is_on_plex_entry.get(), account_creation_date_entry.get(), account_renewed_date_entry.get(), userID_entry.get(), description_entry.get(),))
+        # first_name = first_name_entry.get()
+        # if first_name is None:
+        #    first_name = ''
+        # last_name = last_name_entry.get()
+        # if last_name is None:
+        #    last_name = ''
+        # description = description_entry.get()
+        # if description is None:
+        #    description = ''
+        # id_value = userID_entry.get()
         # print(first_name)
-        last_name = last_name_entry.get()
-        if last_name is None:
-            last_name = ''
-        description = description_entry.get()
-        if description is None:
-            description = ''
-        id_value = userID_entry.get()
+        # inputs = (first_name, last_name, description, id_value)
+        # print(inputs)
+        # print(first_name, last_name, description, account_creation_date, account_renewed_date, account_expire_date)
+        # test for blank date
+        if not account_creation_date_entry.get() or account_creation_date_entry.get() == "None":
+            account_creation_date = "0000-00-00"
+        else:
+            account_creation_date = (account_creation_date_entry.get())
+        if not account_renewed_date_entry.get() or account_renewed_date_entry.get() == "None":
+            account_renewed_date = "0000-00-00"
+        else:
+            account_renewed_date = (account_renewed_date_entry.get())
+        if not account_expire_date_entry.get() or account_expire_date_entry.get() == "None":
+            account_expire_date = "0000-00-00"
+        else:
+            account_expire_date = (account_expire_date_entry.get())
         # SQL command
         sql3 = """UPDATE plexusers SET first_name = %s, last_name = %s, account_creation_date = %s, account_renewed_date = %s, account_expire_date = %s, description = %s WHERE userID = %s;"""
-        # print(first_name)
-        inputs = (first_name, last_name, description, id_value)
-        #print(inputs)
         # Read config.ini file
         config_object = ConfigParser()
         config_object.read(".config/pum.ini")
@@ -356,21 +373,6 @@ def update_record():
             auth_plugin='mysql_native_password')
         # Create a cursor and initialize it
         cursor = mydb.cursor()
-
-        # test for blank date
-        if not account_creation_date_entry.get() or account_creation_date_entry.get() == "None":
-            account_creation_date = "0000-00-00"
-        else:
-            account_creation_date = (account_creation_date_entry.get())
-        if not account_renewed_date_entry.get() or account_renewed_date_entry.get() == "None":
-            account_renewed_date = "0000-00-00"
-        else:
-            account_renewed_date = (account_renewed_date_entry.get())
-        if not account_expire_date_entry.get() or account_expire_date_entry.get() == "None":
-            account_expire_date = "0000-00-00"
-        else:
-            account_expire_date = (account_expire_date_entry.get())
-
         cursor.execute("""UPDATE plexusers SET
         		first_name = %s,
         		last_name = %s,
@@ -387,13 +389,14 @@ def update_record():
                            account_creation_date,
                            account_renewed_date,
                            account_expire_date,
-                           id_value
+                           userID_entry.get()
                        ])
         # cursor.execute(sql3, inputs)
         # Commit changes
         mydb.commit()
         # Close connexion
         mydb.close()
+
 
 # user count
 # Read config.ini file
@@ -585,10 +588,20 @@ filterTelevision_entry.grid(row=5, column=5, padx=10, pady=10)
 filterTelevision_entry.config(disabledbackground="#282828",
                               state="disabled")
 
+is_on_plex_label = Label(data_frame, text="is on plex")
+is_on_plex_label.grid(row=6, column=4, padx=10, pady=10)
+is_on_plex_label.config(background="#282828",
+                        foreground="white")
+is_on_plex_entry = Entry(data_frame)
+is_on_plex_entry.grid(row=6, column=5, padx=10, pady=10)
+is_on_plex_entry.config(disabledbackground="#282828",
+                              state="disabled")
+
 update_button = Button(data_frame, text="Update Record", command=update_record)
 update_button.grid(row=6, column=0, padx=10, pady=10)
 
-
+# Bind the treeview
+my_tree.bind("<ButtonRelease>", select_record)
 
 # Add plex info frame
 plex_info_frame = LabelFrame(home_tab, text="Plex Information")
@@ -633,9 +646,6 @@ with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "VERSION")) a
 version_label = Label(help_and_info_tab_frame, text="Version: " + str(version))
 version_label.configure(background="#1F1F1F", border="0", foreground="white")
 version_label.grid(row=0, column=0, padx=10, pady=10)
-
-# Bind the treeview
-my_tree.bind("<ButtonRelease-1>", select_record)
 
 # Run to pull data from db on start
 query_user_info()
