@@ -6,7 +6,7 @@ I'd be glad to have some help with python and docker.
 
 left to do:
 - add pum_userID column and make it primary
-- add new users based on userID and servername
+- add new users based on userID and servername ( for multiple servers)
 - in conf tab add mail conf to send mail before , when, and after account has expired
 - in conf tab add cron option to sync plex db
 - refresh main frame after each cron sync
