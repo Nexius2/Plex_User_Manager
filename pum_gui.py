@@ -20,6 +20,7 @@ style.theme_create("pum_theme", parent="alt", settings={
                                     "tabposition": 'ne',
                                     "background": "#1F1F1F",
                                     "borderwidth": "0",
+#                                    "font": "Helvetica 10 bold",
                                     }},
         "TNotebook.Tab": {
             "configure": {"padding": [30, 1], "background": "#1F1F1F",
@@ -46,6 +47,7 @@ notebook.add(help_and_info_tab, text="Help & info")
 home_tab.configure(background="#1F1F1F")
 conf_tab.configure(background="#1F1F1F")
 help_and_info_tab.configure(background="#1F1F1F")
+# update_button.config(background="#e5a00d", activebackground="#383838", foreground="white", activeforeground="white", border="0", font='Helvetica 10 bold')
 
 notebook.pack(expand=True, fill="both")  # expand to space not used
 
@@ -599,6 +601,7 @@ is_on_plex_entry.config(disabledbackground="#282828",
 
 update_button = Button(data_frame, text="Update Record", command=update_record)
 update_button.grid(row=6, column=0, padx=10, pady=10)
+update_button.config(background="#e5a00d", activebackground="#383838", foreground="white", activeforeground="white", border="0", font='Helvetica 10 bold')
 
 # Bind the treeview
 my_tree.bind("<ButtonRelease>", select_record)
@@ -622,16 +625,51 @@ user_count_result_label.config(background="#282828",
 
 # conf frame
 conf_frame = LabelFrame(conf_tab)
-conf_frame.configure(background="#1F1F1F", border="0")
-conf_frame.pack(padx=20, anchor="w")
+conf_frame.configure(background="#1F1F1F", border="0")  # color code 1F1F1F
+conf_frame.pack(padx=20, anchor="w", fill="x")
 # conf_tab page
-warning_conf_label_var = IntVar()
-Checkbutton(conf_frame, text="warn users of account expiration", variable=warning_conf_label_var, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white").grid(row=0, column=0, padx=10, pady=10)
-delete_user_conf_var = IntVar()
-Checkbutton(conf_frame, text="delete user access is account expired", variable=delete_user_conf_var, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white").grid(row=1, column=0, padx=10, pady=10)
-test_label_var = IntVar()
-Checkbutton(conf_frame, text="test for something else", variable=test_label_var, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white").grid(row=2, column=0, padx=10, pady=10)
 
+#left frame
+left_conf_frame = LabelFrame(conf_frame)
+left_conf_frame.config(background="#1F1F1F", border="0")  # color code 1F1F1F
+left_conf_frame.pack(side=LEFT)
+delay_before_warning_var = IntVar()
+Checkbutton(left_conf_frame, text="warn users of near expiration", variable=delay_before_warning_var, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white").grid(row=0, column=0, padx=10, pady=10)
+delay_before_warning = Entry(left_conf_frame)
+delay_before_warning.grid(row=1, column=0, padx=10, pady=10)
+delay_before_warning_label = Label(left_conf_frame, text="(delay in days before expiration to warn user)")
+delay_before_warning_label.grid(row=1, column=1)
+delay_before_warning_label.config(background="#282828",
+                        foreground="white")
+warning_var = IntVar()
+Checkbutton(left_conf_frame, text="warn users of account expiration", variable=warning_var, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white").grid(row=2, column=0, padx=10, pady=10)
+remove_access_conf_var = IntVar()
+Checkbutton(left_conf_frame, text="remove access when account has expired", variable=remove_access_conf_var, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white").grid(row=3, column=0, padx=10, pady=10)
+delete_user_var = IntVar()
+Checkbutton(left_conf_frame, text="delete user when expired", variable=delete_user_var, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white").grid(row=4, column=0, padx=10, pady=10)
+delete_user_conf = Entry(left_conf_frame)
+delete_user_conf.grid(row=5, column=0, padx=10, pady=10)
+delete_user_conf_label = Label(left_conf_frame, text="(delay in days after expiration to delete user)")
+delete_user_conf_label.grid(row=5, column=1)
+delete_user_conf_label.config(background="#282828",
+                        foreground="white")
+plex_sync_delay_conf = Entry(left_conf_frame)
+plex_sync_delay_conf.grid(row=6, column=0, padx=10, pady=10)
+plex_sync_delay_conf_label = Label(left_conf_frame, text="sync plex db every X hours (default: 24)")
+plex_sync_delay_conf_label.grid(row=6, column=1)
+plex_sync_delay_conf_label.config(background="#282828",
+                        foreground="white")
+# serapation
+#sep = ttk.Separator(conf_frame, orient='vertical')
+#sep.pack(padx="5", pady="5", fill="y", expand="true")
+# conf right panel
+right_conf_frame = LabelFrame(conf_frame)
+right_conf_frame.config(background="#1F1F1F", border="0")  # color code 1F1F1F
+right_conf_frame.pack(side=RIGHT)
+email_text_label = Label(right_conf_frame, text="desciption for email conf")
+email_text_label.grid(row=0, column=0)
+email_text_label.config(background="#282828",
+                        foreground="white")
 
 # help & info frame
 help_and_info_tab_frame = LabelFrame(help_and_info_tab)
@@ -646,6 +684,7 @@ with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "VERSION")) a
 version_label = Label(help_and_info_tab_frame, text="Version: " + str(version))
 version_label.configure(background="#1F1F1F", border="0", foreground="white")
 version_label.grid(row=0, column=0, padx=10, pady=10)
+
 
 # Run to pull data from db on start
 query_user_info()
