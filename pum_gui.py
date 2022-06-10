@@ -78,7 +78,7 @@ cursor.execute("CREATE TABLE IF NOT EXISTS plexusers(first_name VARCHAR(255), \
      last_name VARCHAR(255), \
      username VARCHAR(255) NOT NULL, \
      email VARCHAR(255) NOT NULL, \
-     serverName VARCHAR(255), \
+     serverName VARCHAR(255) NOT NULL, \
      account_expire_date DATE, \
      sections VARCHAR(255), \
      allowSync VARCHAR(10), \
@@ -88,12 +88,12 @@ cursor.execute("CREATE TABLE IF NOT EXISTS plexusers(first_name VARCHAR(255), \
      filterMusic VARCHAR(255) DEFAULT NULL, \
      filterTelevision VARCHAR(255) DEFAULT NULL, \
      title VARCHAR(255), \
-     userID INT(10), \
+     is_on_plex INT(10), \
      account_creation_date DATE, \
      account_renewed_date DATE, \
      userID INT NOT NULL, \
      description VARCHAR(255), \
-     PRIMARY KEY(userID) );")
+     PRIMARY KEY(userID, serverName) );")
 
 # Commit changes
 mydb.commit()
@@ -383,7 +383,7 @@ def update_record():
         		account_renewed_date = %s,
         		account_expire_date = %s
 
-        		WHERE userID = %s""",
+        		WHERE userID = %s AND serverName = %s""",
                        [
                            first_name_entry.get(),
                            last_name_entry.get(),
@@ -391,7 +391,8 @@ def update_record():
                            account_creation_date,
                            account_renewed_date,
                            account_expire_date,
-                           userID_entry.get()
+                           userID_entry.get(),
+                           serverName_entry.get()
                        ])
         # cursor.execute(sql3, inputs)
         # Commit changes
