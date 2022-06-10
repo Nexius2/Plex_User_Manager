@@ -57,12 +57,42 @@ for mydict in json_obj:
     sections = ', '.join("'" + str(x).replace('/', '_') + "'" for x in mydict['sections'])
     sections = sections.replace("'", '')
     sections = sections.replace(",", ' &')
+    
+    #print [re.sub('[^a-zA-Z0-9]+', '', _) for _ in mydict]
+    filterMovies = ', '.join("'" + str(x).replace('/', '') + "'" for x in mydict['filterMovies'])
+    filterMovies = filterMovies.replace("'", '')
+    #print(filterMovies)
+    #filterMovies = print(mydict.['filterMovies'])
+    #print(filterMovies)
+    #print(mydict.keys())
+    #print(mydict['label'])
+    #print(filterMovies)
+    #filterMovies = filterMovies.replace(",", ' &')
+    #print(filterMovies)
+    #filterMovies = filterMovies.replace(":", '')
+    filterMusic = ', '.join("'" + str(x).replace(':', '') + "'" for x in mydict['filterMusic'])
+    filterMusic = filterMusic.replace("'", '')
+    #filterMusic = filterMusic.replace(",", ' &')
+    filterTelevision = ', '.join("'" + str(x).replace(':', '') + "'" for x in mydict['filterTelevision'])
+    filterTelevision = filterTelevision.replace("'", '')
+    #filterTelevision = filterTelevision.replace(",", ' &')
+    
+    #filterMovies = ', '.join("'" + str(x).replace(':', '') + "'" for x in mydict['filterMovies'])
+    #filterMovies = print((mydict['filterMovies']))
+    #filterMovies = filterMovies.replace(":", '')
+    #.replace(":", '')
+    #print(mydict['filterMovies'])
+
+
+
+
+
 
     #add plex userID info to plexusers db
-    sql_plexusers_import = "INSERT IGNORE INTO plexusers ( userID, account_creation_date ) VALUES ( %s, CURDATE() );" % (mydict['userID'])
+    sql_plexusers_import = "INSERT IGNORE INTO plexusers ( userID, account_creation_date, serverName ) VALUES ( %s, CURDATE(), '%s' );" % (mydict['userID'], mydict['serverName'])
     cursor.execute(sql_plexusers_import,)
     #update plex user info to plexusers db
-    sql_plexusers_import2 = "UPDATE %s SET username = '%s', email = '%s', serverName = '%s', allowSync = '%s', camera = '%s', channels = '%s', filterMovies = '%s', filterMusic = '%s', filterTelevision = '%s', title = '%s', sections = '%s' WHERE userID = '%s';" % ('plexusers', mydict['username'], mydict['email'], mydict['serverName'], mydict['allowSync'], mydict['camera'], mydict['channels'], mydict['filterMovies'], mydict['filterMusic'], mydict['filterTelevision'], mydict['title'], sections, mydict['userID'])
+    sql_plexusers_import2 = "UPDATE %s SET username = '%s', email = '%s', allowSync = '%s', camera = '%s', channels = '%s', filterMovies = '%s', filterMusic = '%s', filterTelevision = '%s', title = '%s', sections = '%s' WHERE userID = '%s' AND serverName = '%s';" % ('plexusers', mydict['username'], mydict['email'], mydict['allowSync'], mydict['camera'], mydict['channels'], filterMovies, filterMusic, filterTelevision, mydict['title'], sections, mydict['userID'], mydict['serverName'])
     cursor.execute(sql_plexusers_import2,)
     #set is_on_plex to 1 if user is on plex export
     sql_plexusers_is_on_plex_set = "UPDATE plexusers SET is_on_plex = 1 WHERE userID = %s;" % (mydict['userID'])
@@ -92,6 +122,6 @@ con.commit()
 con.close()
 
 #delete old json file
-os.remove(str(''.join(path_to_json)))
+#os.remove(str(''.join(path_to_json)))
 
 
