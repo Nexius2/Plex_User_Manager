@@ -23,9 +23,11 @@ style.theme_create("pum_theme", parent="alt", settings={
 #                                    "font": "Helvetica 10 bold",
                                     }},
         "TNotebook.Tab": {
-            "configure": {"padding": [30, 1], "background": "#1F1F1F",
-                                              "foreground": "white",
-                                              "borderwidth": "0"},
+            "configure": {"padding": [30, 1],
+                          "background": "#1F1F1F",
+                          "foreground": "white",
+                          "borderwidth": "0",
+                          "fieldbackground": "#1F1F1F"},
             "map":       {"background": [("selected", "#383838")],
                           "foreground": [('selected', "#e5a00d")],
                           "borderwidth": "0"}}})
@@ -152,12 +154,19 @@ def query_user_info():
 # Pick A Theme
 # style.theme_use('default')
 
+# Configure treeview header color
+style.configure('Treeview.Heading',
+                background="#1F1F1F",
+                font="Helvetica 10 bold",
+                foreground="grey")
 
 # Configure the Treeview Colors
 style.configure("Treeview",
                 background="#D3D3D3",
                 foreground="white",
                 rowheight=25,
+                relief="flat",
+                borderwidth=0,
                 fieldbackground="#D3D3D3")
 
 # Change Selected Color
@@ -634,32 +643,96 @@ conf_frame.pack(padx=20, anchor="w", fill="x")
 left_conf_frame = LabelFrame(conf_frame)
 left_conf_frame.config(background="#1F1F1F", border="0")  # color code 1F1F1F
 left_conf_frame.pack(side=LEFT)
-delay_before_warning_var = IntVar()
-Checkbutton(left_conf_frame, text="warn users of near expiration", variable=delay_before_warning_var, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white").grid(row=0, column=0, padx=10, pady=10)
+# Read config.ini file
+config_object = ConfigParser()
+config_object.read(".config/pum.ini")
+# Get the conf info
+userinfo = config_object["CONF"]
+warn_user_near_expiration = userinfo["warn_user_near_expiration"]
+warn_user_near_expiration_delay = userinfo["warn_user_near_expiration_delay"]
+warn_user_account_expiration = userinfo["warn_user_account_expiration"]
+remove_user_access = userinfo["remove_user_access"]
+delete_user = userinfo["delete_user"]
+delete_user_delay = userinfo["delete_user_delay"]
+plex_db_sync = userinfo["plex_db_sync"]
+hide_guest = userinfo["hide_guest"]
+# buttons
+# warn users of near expiration
+# function warn_user_near_expiration_command
+def warn_user_near_expiration_command():
+    config_object = ConfigParser()
+    config_object.read(".config/pum.ini")
+    config_object['CONF']['warn_user_near_expiration'] = str(warn_user_near_expiration_but.get())
+    with open(".config/pum.ini", 'w') as configfile:
+        config_object.write(configfile)
+warn_user_near_expiration_but = IntVar(value=warn_user_near_expiration)
+Checkbutton(left_conf_frame, text="warn users of near expiration", variable=warn_user_near_expiration_but, onvalue=1, offvalue=0, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white", selectcolor="grey", takefocus="0", bd="0", command=warn_user_near_expiration_command).grid(row=0, column=0, padx=10, pady=10)
 delay_before_warning = Entry(left_conf_frame)
+delay_before_warning.delete(0, END)
+delay_before_warning.insert(0, warn_user_near_expiration_delay)
 delay_before_warning.grid(row=1, column=0, padx=10, pady=10)
 delay_before_warning_label = Label(left_conf_frame, text="(delay in days before expiration to warn user)")
 delay_before_warning_label.grid(row=1, column=1)
 delay_before_warning_label.config(background="#282828",
                         foreground="white")
-warning_var = IntVar()
-Checkbutton(left_conf_frame, text="warn users of account expiration", variable=warning_var, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white").grid(row=2, column=0, padx=10, pady=10)
-remove_access_conf_var = IntVar()
-Checkbutton(left_conf_frame, text="remove access when account has expired", variable=remove_access_conf_var, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white").grid(row=3, column=0, padx=10, pady=10)
-delete_user_var = IntVar()
-Checkbutton(left_conf_frame, text="delete user when expired", variable=delete_user_var, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white").grid(row=4, column=0, padx=10, pady=10)
+# warn users of account expiration
+# function warn_user_account_expiration_command
+def warn_user_account_expiration_command():
+    config_object = ConfigParser()
+    config_object.read(".config/pum.ini")
+    config_object['CONF']['warn_user_account_expiration'] = str(warn_user_account_expiration_but.get())
+    with open(".config/pum.ini", 'w') as configfile:
+        config_object.write(configfile)
+warn_user_account_expiration_but = IntVar(value=warn_user_account_expiration)
+Checkbutton(left_conf_frame, text="warn users of account expiration", variable=warn_user_account_expiration_but, onvalue=1, offvalue=0, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white", selectcolor="grey", takefocus="0", bd="0", command=warn_user_account_expiration_command).grid(row=2, column=0, padx=10, pady=10)
+# remove access when account has expired
+# function remove_user_access_command
+def remove_user_access_command():
+    config_object = ConfigParser()
+    config_object.read(".config/pum.ini")
+    config_object['CONF']['remove_user_access'] = str(remove_user_access_but.get())
+    with open(".config/pum.ini", 'w') as configfile:
+        config_object.write(configfile)
+remove_user_access_but = IntVar(value=remove_user_access)
+Checkbutton(left_conf_frame, text="remove access when account has expired", variable=remove_user_access_but, onvalue=1, offvalue=0, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white", selectcolor="grey", takefocus="0", bd="0", command=remove_user_access_command).grid(row=3, column=0, padx=10, pady=10)
+# delete user when expired
+# function delete_user_command
+def delete_user_command():
+    config_object = ConfigParser()
+    config_object.read(".config/pum.ini")
+    config_object['CONF']['delete_user'] = str(delete_user_but.get())
+    with open(".config/pum.ini", 'w') as configfile:
+        config_object.write(configfile)
+delete_user_but = IntVar()
+Checkbutton(left_conf_frame, text="delete user when expired", variable=delete_user_but, onvalue=1, offvalue=0, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white", selectcolor="grey", takefocus="0", bd="0", command=delete_user_command).grid(row=4, column=0, padx=10, pady=10)
 delete_user_conf = Entry(left_conf_frame)
+delete_user_conf.delete(0, END)
+delete_user_conf.insert(0, delete_user_delay)
 delete_user_conf.grid(row=5, column=0, padx=10, pady=10)
 delete_user_conf_label = Label(left_conf_frame, text="(delay in days after expiration to delete user)")
 delete_user_conf_label.grid(row=5, column=1)
 delete_user_conf_label.config(background="#282828",
                         foreground="white")
+# Plex sync
 plex_sync_delay_conf = Entry(left_conf_frame)
+plex_sync_delay_conf.delete(0, END)
+plex_sync_delay_conf.insert(0, plex_db_sync)
 plex_sync_delay_conf.grid(row=6, column=0, padx=10, pady=10)
 plex_sync_delay_conf_label = Label(left_conf_frame, text="sync plex db every X hours (default: 24)")
 plex_sync_delay_conf_label.grid(row=6, column=1)
 plex_sync_delay_conf_label.config(background="#282828",
                         foreground="white")
+# Hide Guest
+# function hide_guest_command
+def hide_guest_command():
+    config_object = ConfigParser()
+    config_object.read(".config/pum.ini")
+    config_object['CONF']['hide_guest'] = str(hide_guest_but.get())
+    with open(".config/pum.ini", 'w') as configfile:
+        config_object.write(configfile)
+hide_guest_but = IntVar(value=hide_guest)
+Checkbutton(left_conf_frame, text="Hide Guest user", variable=hide_guest_but, onvalue=1, offvalue=0, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white", selectcolor="grey", takefocus="0", bd="0", command=hide_guest_command).grid(row=7, column=0, padx=10, pady=10)
+
 # serapation
 #sep = ttk.Separator(conf_frame, orient='vertical')
 #sep.pack(padx="5", pady="5", fill="y", expand="true")
