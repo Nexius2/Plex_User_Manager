@@ -121,6 +121,10 @@ print(results)
 con.commit()
 con.close()
 
+# mark as synced
+synced = open('./synced', x)
+synced.close()
+
 #delete old json file
 #os.remove(str(''.join(path_to_json)))
 
