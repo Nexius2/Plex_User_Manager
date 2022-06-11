@@ -13,12 +13,16 @@ left to do:
   * warn user of expiration
   * remove access when expired
   * delete user when expired (with delay)
+  * hide guest
+  * add plex token and IP
 - refresh main frame after each cron sync
 - build docker container to run plex sync every cron schedule, display pum_web.py and ask for plex url and token (config.ini)
+- add help text
 
 bugs:
 - checkbox not aligned in conf tab
 - when selecting help & info selection touring appears (focus)
+- updating message not visible when syncing
 
 Usage:
  - add plex url and token in .config/plexapi/config.ini
