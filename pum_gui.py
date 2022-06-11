@@ -1,7 +1,7 @@
 from tkinter import *
 from tkinter import ttk
 from configparser import ConfigParser
-import mysql.connector, os
+import mysql.connector, os, sys, time
 
 root = Tk()
 root.title('Plex User Manager')
@@ -218,6 +218,22 @@ my_tree.heading("sections", text="sections", anchor=CENTER)
 
 # Select record
 def select_record(e):
+        # refresh page when is synced
+        if os.path.isfile('./synced'):
+            # display message box
+            global update_box
+            update_box = Toplevel(root)
+            update_box.title("information")
+            update_box.geometry("200x100")
+            update_box.config(bg="#282828")
+            update_box_label = Label(update_box, text="Updating...", bg="#282828", fg="white")
+            update_box_label.pack(pady="10")
+            update_box_frame = Frame(update_box, bg="#282828")
+            update_box_frame.pack(pady=5)
+            time.sleep(3)  # time for message
+            os.remove(str(''.join('./synced')))
+            os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
+
         # Clear entry boxes
         first_name_entry.delete(0,END)
         last_name_entry.delete(0, END)
@@ -758,7 +774,6 @@ with open(os.path.join(os.path.dirname(os.path.abspath(__file__)), "VERSION")) a
 version_label = Label(help_and_info_tab_frame, text="Version: " + str(version))
 version_label.configure(background="#1F1F1F", border="0", foreground="white")
 version_label.grid(row=0, column=0, padx=10, pady=10)
-
 
 # Run to pull data from db on start
 query_user_info()
