@@ -5,6 +5,7 @@ import mysql.connector, os, sys, time
 
 root = Tk()
 root.title('Plex User Manager')
+root.iconbitmap('./images/pum_logo.ico')
 root.geometry("1000x700")
 
 # Configure the root color
@@ -224,6 +225,7 @@ def select_record(e):
             global update_box
             update_box = Toplevel(root)
             update_box.title("information")
+            update_box.iconbitmap('./images/pum_logo.ico')
             update_box.geometry("200x100")
             update_box.config(bg="#282828")
             update_box_label = Label(update_box, text="Updating...", bg="#282828", fg="white")
