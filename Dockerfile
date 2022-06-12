@@ -19,4 +19,4 @@ RUN echo "**** install system packages ****" \
  && rm -rf /requirements.txt /tmp/* /var/tmp/* /var/lib/apt/lists/*
 ENTRYPOINT ["python3", "pum_web.py"]
 # run script 
-CMD ["/bin/bash", "sync.py"]
+CMD ["python3", "sync.py"]
