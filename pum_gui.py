@@ -76,7 +76,7 @@ cursor = mydb.cursor()
 # Create database if not exists
 cursor.execute("CREATE DATABASE IF NOT EXISTS pum")
 
-# Create table
+# Create table plexusers
 cursor.execute("CREATE TABLE IF NOT EXISTS plexusers(first_name VARCHAR(255), \
      last_name VARCHAR(255), \
      username VARCHAR(255) NOT NULL, \
@@ -96,6 +96,11 @@ cursor.execute("CREATE TABLE IF NOT EXISTS plexusers(first_name VARCHAR(255), \
      account_renewed_date DATE, \
      userID INT NOT NULL, \
      description VARCHAR(255), \
+     PRIMARY KEY(userID, serverName) );")
+
+# Create table tempusers
+cursor.execute("CREATE TABLE IF NOT EXISTS tempusers(serverName VARCHAR(255) NOT NULL, \
+     userID INT NOT NULL, \
      PRIMARY KEY(userID, serverName) );")
 
 # Commit changes

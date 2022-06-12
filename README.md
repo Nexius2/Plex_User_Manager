@@ -15,7 +15,6 @@ left to do:
   * delete user when expired (with delay)
   * hide guest
   * add plex token and IP
-- refresh main frame after each cron sync
 - build docker container to run plex sync every cron schedule, display pum_web.py and ask for plex url and token (config.ini)
 - add help text
 
@@ -23,10 +22,11 @@ bugs:
 - checkbox not aligned in conf tab
 - when selecting help & info selection touring appears (focus)
 - updating message not visible when syncing
+- filters not displaying
 
 Usage:
  - add plex url and token in .config/plexapi/config.ini
- - run sync.py with cron job every day
+ - run python3 sync.py with cron job every day
  - run python3 pum_web.py
  
 ![screen](https://user-images.githubusercontent.com/9554635/172479259-af074417-b187-4483-8e98-91dde70861ba.png)
