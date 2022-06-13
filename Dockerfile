@@ -4,6 +4,7 @@ LABEL maintainer="Nexius2" \
       version="0.2"
 COPY . /
 ENV TZ=Europe/Paris
+ENV CONFIG_PATH=./.test/plexapi/config.ini
 ARG DEBIAN_FRONTEND=noninteractive
 RUN echo "**** install system packages ****" \
  && apt-get update \

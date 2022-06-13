@@ -1,0 +1,6 @@
+V0.40
+- added CHANGES
+- changed dates for expired account to work in docker
+- removed icon incompatible for now
+- added number of servers and libraries
+- changed screen size

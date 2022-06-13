@@ -5,8 +5,9 @@ import mysql.connector, os, sys, time
 
 root = Tk()
 root.title('Plex User Manager')
-root.iconbitmap('./images/pum_logo.ico')
-root.geometry("1000x700")
+#root.iconbitmap(r'./images/pum_logo.ico')
+root.geometry("1100x800")
+
 
 # Configure the root color
 # root.configure(background="#1F1F1F")
@@ -15,6 +16,7 @@ root.geometry("1000x700")
 # tabs_frame.pack()
 # style = ttk.Style(tabs_frame)
 style = ttk.Style(root)
+
 
 style.theme_create("pum_theme", parent="alt", settings={
         "TNotebook": {"configure": {"tabmargins": [2, 5, 2, 0],
@@ -103,6 +105,12 @@ cursor.execute("CREATE TABLE IF NOT EXISTS tempusers(serverName VARCHAR(255) NOT
      userID INT NOT NULL, \
      PRIMARY KEY(userID, serverName) );")
 
+# check is db is empty to sync
+cursor.execute("SELECT userID FROM plexusers;")
+records = cursor.fetchall()
+if not records:
+    exec(open("./sync.py").read())
+
 # Commit changes
 mydb.commit()
 # Close connexion
@@ -183,7 +191,8 @@ style.map('Treeview',
 
 # Create a Treeview Frame
 tree_frame = Frame(home_tab)
-tree_frame.pack(pady=10)
+tree_frame.configure(background="#1F1F1F")
+tree_frame.pack(fill="x", expand="yes", pady=10)
 
 # Create a Treeview Scrollbar
 tree_scroll = Scrollbar(tree_frame)
@@ -197,6 +206,7 @@ my_tree.pack()
 # Configure the Scrollbar
 tree_scroll.config(command=my_tree.yview)
 
+
 # Define Our Columns
 my_tree['columns'] = ("First Name", "Last Name", "Username", "email", "servername", "expire_date", "sections")
 #my_tree.config("columns",
@@ -206,8 +216,8 @@ my_tree['columns'] = ("First Name", "Last Name", "Username", "email", "servernam
 my_tree.column("#0", width=0, stretch=NO)
 my_tree.column("First Name", anchor=W, width=100)
 my_tree.column("Last Name", anchor=W, width=100)
-my_tree.column("Username", anchor=CENTER, width=160)
-my_tree.column("email", anchor=CENTER, width=200)
+my_tree.column("Username", anchor=CENTER, width=180)
+my_tree.column("email", anchor=CENTER, width=250)
 my_tree.column("servername", anchor=CENTER, width=140)
 my_tree.column("expire_date", anchor=CENTER, width=120)
 my_tree.column("sections", anchor=CENTER, width=140)
@@ -230,7 +240,7 @@ def select_record(e):
             global update_box
             update_box = Toplevel(root)
             update_box.title("information")
-            update_box.iconbitmap('./images/pum_logo.ico')
+            #update_box.iconbitmap('./images/pum_logo.ico')
             update_box.geometry("200x100")
             update_box.config(bg="#282828")
             update_box_label = Label(update_box, text="Updating...", bg="#282828", fg="white")
@@ -354,6 +364,14 @@ def select_record(e):
                             disabledbackground="#282828")
         description_entry.insert(0, values[18])
 
+        # keep values to avoid request if identical
+        global old_account_creation_date_entry
+        old_account_creation_date_entry = values[15]
+        global old_account_renewed_date_entry
+        old_account_renewed_date_entry = values[16]
+        global old_account_expire_date_entry
+        old_account_expire_date_entry = values[5]
+
 # Update Record
 def update_record():
         # Grab the record number
@@ -375,20 +393,105 @@ def update_record():
         # print(inputs)
         # print(first_name, last_name, description, account_creation_date, account_renewed_date, account_expire_date)
         # test for blank date
-        if not account_creation_date_entry.get() or account_creation_date_entry.get() == "None":
-            account_creation_date = "0000-00-00"
-        else:
-            account_creation_date = (account_creation_date_entry.get())
-        if not account_renewed_date_entry.get() or account_renewed_date_entry.get() == "None":
-            account_renewed_date = "0000-00-00"
-        else:
-            account_renewed_date = (account_renewed_date_entry.get())
-        if not account_expire_date_entry.get() or account_expire_date_entry.get() == "None":
-            account_expire_date = "0000-00-00"
-        else:
-            account_expire_date = (account_expire_date_entry.get())
+
+        if not account_creation_date_entry.get() == "None" and account_creation_date_entry.get() != old_account_creation_date_entry:
+            # Read config.ini file
+            config_object = ConfigParser()
+            config_object.read(".config/pum.ini")
+            # Get the conf info
+            userinfo = config_object["DATABASE"]
+            db_host = userinfo["host"]
+            db_user = userinfo["user"]
+            db_passwd = userinfo["passwd"]
+            db_db = userinfo["db"]
+            # connect to MySQL
+            mydb = mysql.connector.connect(
+                host=db_host,
+                user=db_user,
+                passwd=db_passwd,
+                database=db_db,
+                auth_plugin='mysql_native_password')
+            # Create a cursor and initialize it
+            cursor = mydb.cursor()
+            cursor.execute("""UPDATE plexusers SET
+                                		account_creation_date = %s
+                                		WHERE userID = %s AND serverName = %s""",
+                           [
+                               account_creation_date_entry.get(),
+                               userID_entry.get(),
+                               serverName_entry.get()
+                           ])
+            # Commit changes
+            mydb.commit()
+            # Close connexion
+            mydb.close()
+
+        if not account_renewed_date_entry.get() == "None" and account_renewed_date_entry.get() != old_account_renewed_date_entry:
+            # Read config.ini file
+            config_object = ConfigParser()
+            config_object.read(".config/pum.ini")
+            # Get the conf info
+            userinfo = config_object["DATABASE"]
+            db_host = userinfo["host"]
+            db_user = userinfo["user"]
+            db_passwd = userinfo["passwd"]
+            db_db = userinfo["db"]
+            # connect to MySQL
+            mydb = mysql.connector.connect(
+                host=db_host,
+                user=db_user,
+                passwd=db_passwd,
+                database=db_db,
+                auth_plugin='mysql_native_password')
+            # Create a cursor and initialize it
+            cursor = mydb.cursor()
+            cursor.execute("""UPDATE plexusers SET
+                                		account_renewed_date = %s
+                                		WHERE userID = %s AND serverName = %s""",
+                           [
+                               account_renewed_date_entry.get(),
+                               userID_entry.get(),
+                               serverName_entry.get()
+                           ])
+            # Commit changes
+            mydb.commit()
+            # Close connexion
+            mydb.close()
+
+        if not account_expire_date_entry.get() == "None" and account_expire_date_entry.get() != old_account_expire_date_entry:
+            # Read config.ini file
+            config_object = ConfigParser()
+            config_object.read(".config/pum.ini")
+            # Get the conf info
+            userinfo = config_object["DATABASE"]
+            db_host = userinfo["host"]
+            db_user = userinfo["user"]
+            db_passwd = userinfo["passwd"]
+            db_db = userinfo["db"]
+            # connect to MySQL
+            mydb = mysql.connector.connect(
+                host=db_host,
+                user=db_user,
+                passwd=db_passwd,
+                database=db_db,
+                auth_plugin='mysql_native_password')
+            # Create a cursor and initialize it
+            cursor = mydb.cursor()
+            cursor.execute("""UPDATE plexusers SET
+                    		account_expire_date = %s
+                    		WHERE userID = %s AND serverName = %s""",
+                           [
+                               account_expire_date_entry.get(),
+                               userID_entry.get(),
+                               serverName_entry.get()
+                           ])
+            # Commit changes
+            mydb.commit()
+            # Close connexion
+            mydb.close()
+
         # SQL command
-        sql3 = """UPDATE plexusers SET first_name = %s, last_name = %s, account_creation_date = %s, account_renewed_date = %s, account_expire_date = %s, description = %s WHERE userID = %s;"""
+        # sql3 = """UPDATE plexusers SET first_name = '%s', last_name = '%s', account_creation_date = %s, account_renewed_date = %s, account_expire_date = %s, description = '%s' WHERE userID = '%s';"""
         # Read config.ini file
         config_object = ConfigParser()
         config_object.read(".config/pum.ini")
@@ -410,19 +513,12 @@ def update_record():
         cursor.execute("""UPDATE plexusers SET
         		first_name = %s,
         		last_name = %s,
-        		description = %s,
-        		account_creation_date = %s,
-        		account_renewed_date = %s,
-        		account_expire_date = %s
-
+        		description = %s
         		WHERE userID = %s AND serverName = %s""",
                        [
                            first_name_entry.get(),
                            last_name_entry.get(),
                            description_entry.get(),
-                           account_creation_date,
-                           account_renewed_date,
-                           account_expire_date,
                            userID_entry.get(),
                            serverName_entry.get()
                        ])
@@ -452,9 +548,15 @@ mydb = mysql.connector.connect(
     auth_plugin='mysql_native_password')
 # Create a cursor and initialize it
 cursor = mydb.cursor()
-sql_user_count = "SELECT count(userID) FROM plexusers;"
+sql_user_count = "SELECT COUNT(userID) FROM plexusers;"
 cursor.execute(sql_user_count)
 user_count_result = cursor.fetchall()
+sql_server_count = "SELECT COUNT(DISTINCT serverName) FROM plexusers;"
+cursor.execute(sql_server_count)
+server_count_result = cursor.fetchall()
+sql_library_count = "SELECT COUNT(DISTINCT sections) FROM plexusers;"
+cursor.execute(sql_library_count)
+library_count_result = cursor.fetchall()
 # Commit changes
 mydb.commit()
 # Close connexion
@@ -646,14 +748,32 @@ plex_info_frame.pack(fill="x", expand="yes", padx=20)
 # Configure the plex_info_frame color
 plex_info_frame.configure(background="#282828",
                        foreground="white")
-
-user_count_label = Label(plex_info_frame, text="number of users on plex : ")
+# plex user count
+user_count_label = Label(plex_info_frame, text="number of users : ")
 user_count_label.grid(row=0, column=0, padx=10, pady=10)
 user_count_label.config(background="#282828",
                         foreground="white")
 user_count_result_label = Label(plex_info_frame, text=user_count_result)
 user_count_result_label.grid(row=0, column=1)
 user_count_result_label.config(background="#282828",
+                        foreground="white")
+# plex server count
+server_count_label = Label(plex_info_frame, text="number of servers : ")
+server_count_label.grid(row=0, column=2, padx=10, pady=10)
+server_count_label.config(background="#282828",
+                        foreground="white")
+server_count_result_label = Label(plex_info_frame, text=server_count_result)
+server_count_result_label.grid(row=0, column=3)
+server_count_result_label.config(background="#282828",
+                        foreground="white")
+# plex library count
+library_count_label = Label(plex_info_frame, text="number of libraries : ")
+library_count_label.grid(row=0, column=4, padx=10, pady=10)
+library_count_label.config(background="#282828",
+                        foreground="white")
+library_count_result_label = Label(plex_info_frame, text=library_count_result)
+library_count_result_label.grid(row=0, column=5)
+library_count_result_label.config(background="#282828",
                         foreground="white")
 
 # conf frame

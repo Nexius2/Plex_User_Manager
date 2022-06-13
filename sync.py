@@ -1,10 +1,10 @@
 from configparser import ConfigParser
 import mysql.connector
-import sys
+import sys, os, pathlib
 
 # Read config.ini file
 config_object = ConfigParser()
-config_object.read("../.config/pum.ini")
+config_object.read(".config/pum.ini")
 # Get the conf info
 userinfo = config_object["DATABASE"]
 db_host = userinfo["host"]
@@ -21,7 +21,6 @@ delete_user = userinfo["delete_user"]
 delete_user_delay = userinfo["delete_user_delay"]
 plex_db_sync = userinfo["plex_db_sync"]
 hide_guest = userinfo["hide_guest"]
-
 # connect to MySQL
 mydb = mysql.connector.connect(
         host=db_host,
@@ -29,7 +28,6 @@ mydb = mysql.connector.connect(
         passwd=db_passwd,
         database=db_db,
         auth_plugin='mysql_native_password')
-
 # Create a cursor and initialize it
 cursor = mydb.cursor()
 
@@ -63,27 +61,57 @@ cursor.execute("CREATE TABLE IF NOT EXISTS tempusers(serverName VARCHAR(255) NOT
      userID INT NOT NULL, \
      PRIMARY KEY(userID, serverName) );")
 
+# Commit changes
+mydb.commit()
+# Close connexion
+mydb.close()
+
 #export json from plex
-# print(sys.argv)
-script_descriptor = open("plex_api_share.py")
-a_script = script_descriptor.read()
+export_json_from_plex = open("plex_api_share.py")
+run_export = export_json_from_plex.read()
 sys.argv = ["plex_api_share.py", "--backup"]
-exec(a_script)
-script_descriptor.close()
+exec(run_export)
+export_json_from_plex.close()
 
 # import json to pum
 exec(open("./api/import_plex_users.py").read())
 
 # warn user near expiration
 if warn_user_near_expiration == "1":
+        print('warn user near expiration')
+        print(warn_user_near_expiration_delay)
+        print(db_host)
+        # connect to MySQL
+        mydb = mysql.connector.connect(
+                host=db_host,
+                user=db_user,
+                passwd=db_passwd,
+                database=db_db,
+                auth_plugin='mysql_native_password')
+        # Create a cursor and initialize it
+        cursor = mydb.cursor()
         sql_plexusers_expired_account = "SELECT userID FROM plexusers WHERE ISNULL(account_expire_date) = 0 AND DATEDIFF (CURDATE(),account_expire_date) < %s;" % (warn_user_near_expiration_delay)
-        cursor.execute(sql_plexusers_expired_account)
+        cursor.execute(sql_plexusers_expired_account,)
         results = cursor.fetchall()
         print(results)
         # for all results send mail to warn account is about to end
+        # Commit changes
+        mydb.commit()
+        # Close connexion
+        mydb.close()
 
 # warn and delete expired accounts
 if warn_user_account_expiration == "1":
+        print('warn and delete expired accounts')
+        # connect to MySQL
+        mydb = mysql.connector.connect(
+                host=db_host,
+                user=db_user,
+                passwd=db_passwd,
+                database=db_db,
+                auth_plugin='mysql_native_password')
+        # Create a cursor and initialize it
+        cursor = mydb.cursor()
         # select all expired users
         sql_plexusers_expired_account = "SELECT userID FROM plexusers WHERE ISNULL(account_expire_date) = 0 AND DATEDIFF (CURDATE(),account_expire_date) > 0;"
         cursor.execute(sql_plexusers_expired_account)
@@ -92,6 +120,10 @@ if warn_user_account_expiration == "1":
         # send mail
         #for all results run plex_api_share.py --unshare --user USER
         #send mail to warn account has ended
+        # Commit changes
+        mydb.commit()
+        # Close connexion
+        mydb.close()
 
 # Remove user access
 if remove_user_access =="1":
@@ -99,6 +131,15 @@ if remove_user_access =="1":
 
 
 #remove user with is_on_plex = null
+# connect to MySQL
+mydb = mysql.connector.connect(
+        host=db_host,
+        user=db_user,
+        passwd=db_passwd,
+        database=db_db,
+        auth_plugin='mysql_native_password')
+# Create a cursor and initialize it
+cursor = mydb.cursor()
 sql_plexusers_remove_old_accounts = "DELETE FROM plexusers WHERE is_on_plex = 0;"
 cursor.execute(sql_plexusers_remove_old_accounts)
 
