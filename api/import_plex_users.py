@@ -7,7 +7,7 @@ from configparser import ConfigParser
 
 # Read config.ini file
 config_object = ConfigParser()
-config_object.read("../.config/pum.ini")
+config_object.read(".config/pum.ini")
 
 # Get the conf info
 userinfo = config_object["DATABASE"]
@@ -16,7 +16,7 @@ db_user = userinfo["user"]
 db_passwd = userinfo["passwd"]
 db_db = userinfo["db"]
 
-path_to_json = glob.glob(r'../*.json')
+path_to_json = glob.glob(r'./*.json')
 
 # check json file
 if not path_to_json:
@@ -108,5 +108,5 @@ for jfile in path_to_json:
     os.remove(str(''.join(jfile)))
 
 # mark as synced
-synced = open('../synced', "w")
+synced = open('./synced', "w")
 synced.close()

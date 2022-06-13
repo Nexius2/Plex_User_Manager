@@ -1,10 +1,11 @@
 from configparser import ConfigParser
 import mysql.connector
 import sys
+import os
 
 # Read config.ini file
 config_object = ConfigParser()
-config_object.read("../.config/pum.ini")
+config_object.read(".config/pum.ini")
 # Get the conf info
 userinfo = config_object["DATABASE"]
 db_host = userinfo["host"]
@@ -30,12 +31,19 @@ results = cursor.fetchall()
 for result in results:
         #print(result)
         #print(sys.argv)
-        script_descriptor = open("../plex_api_share.py")
+        # To find path
+        import plexapi
+
+        print(plexapi.CONFIG_PATH)
+
+        script_descriptor = open("./plex_api_share.py")
         a_script = script_descriptor.read()
         sys.argv = ["plex_api_share.py", "--unshare", "--user", result[0]]
+        print(os.path.abspath(__file__))
         print(sys.argv)
         exec(a_script)
         script_descriptor.close()
+
 
 
 
