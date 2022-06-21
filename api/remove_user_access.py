@@ -33,9 +33,7 @@ for result in results:
         #print(sys.argv)
         # To find path
         import plexapi
-
         print(plexapi.CONFIG_PATH)
-
         script_descriptor = open("./plex_api_share.py")
         a_script = script_descriptor.read()
         sys.argv = ["plex_api_share.py", "--unshare", "--user", result[0]]
