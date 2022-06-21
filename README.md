@@ -19,8 +19,12 @@ left to do:
 - add help text
 - make a test to warn when plex token or url not good
 - create user for db access
-- delete old servers ( with it's entries)
 - CONFIG_PATH needs to be added if not working with dockerfile
+- command to change plex url & token
+- add CHANGES to info tab
+- add user function (plex_api_invite)
+- rename var from conf.ini
+- add db access to general tab???
 
 bugs:
 - checkbox not aligned in conf tab

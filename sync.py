@@ -20,7 +20,7 @@ remove_user_access = userinfo["remove_user_access"]
 delete_user = userinfo["delete_user"]
 delete_user_delay = userinfo["delete_user_delay"]
 plex_db_sync = userinfo["plex_db_sync"]
-hide_guest = userinfo["hide_guest"]
+hide_guest_str = userinfo["hide_guest"]
 # connect to MySQL
 mydb = mysql.connector.connect(
         host=db_host,
@@ -34,7 +34,7 @@ cursor = mydb.cursor()
 # Create database if not exists
 cursor.execute("CREATE DATABASE IF NOT EXISTS pum")
 
-# Create table
+# Create table plexusers
 cursor.execute("CREATE TABLE IF NOT EXISTS plexusers(first_name VARCHAR(255), \
      last_name VARCHAR(255), \
      username VARCHAR(255) NOT NULL, \
@@ -54,6 +54,7 @@ cursor.execute("CREATE TABLE IF NOT EXISTS plexusers(first_name VARCHAR(255), \
      account_renewed_date DATE, \
      userID INT NOT NULL, \
      description VARCHAR(255), \
+     hidden INT(10) DEFAULT 0, \
      PRIMARY KEY(userID, serverName) );")
 
 # Create table tempusers
@@ -66,6 +67,9 @@ mydb.commit()
 # Close connexion
 mydb.close()
 
+# backup db pum
+exec(open("./api/backup.py").read())
+
 #export json from plex
 export_json_from_plex = open("plex_api_share.py")
 run_export = export_json_from_plex.read()
@@ -73,8 +77,6 @@ sys.argv = ["plex_api_share.py", "--backup"]
 exec(run_export)
 export_json_from_plex.close()
 
-# import json to pum
-exec(open("./api/import_plex_users.py").read())
 
 # warn user near expiration
 if warn_user_near_expiration == "1":
@@ -128,6 +130,7 @@ if warn_user_account_expiration == "1":
 # Remove user access
 if remove_user_access =="1":
         exec(open("./api/remove_user_access.py").read())
+        print("remove user access ok")
 
 
 #remove user with is_on_plex = null
@@ -142,8 +145,36 @@ mydb = mysql.connector.connect(
 cursor = mydb.cursor()
 sql_plexusers_remove_old_accounts = "DELETE FROM plexusers WHERE is_on_plex = 0;"
 cursor.execute(sql_plexusers_remove_old_accounts)
-
 # Commit changes
 mydb.commit()
 # Close connexion
 mydb.close()
+
+# Hide guest users
+if hide_guest_str == "1":
+        sql_hide_guest = "UPDATE plexusers SET hidden = 1 WHERE username = '' AND email = 'None';"
+else:
+        sql_hide_guest = "UPDATE plexusers SET hidden = 0 WHERE username = '' AND email = 'None';"
+# connect to MySQL
+mydb = mysql.connector.connect(
+        host=db_host,
+        user=db_user,
+        passwd=db_passwd,
+        database=db_db,
+        auth_plugin='mysql_native_password')
+# Create a cursor and initialize it
+cursor = mydb.cursor()
+# hide or unhide guest user
+cursor.execute(sql_hide_guest)
+# Commit changes
+mydb.commit()
+# Close connexion
+mydb.close()
+
+# delete user
+if delete_user =="1":
+        exec(open("./api/delete_user.py").read())
+        print("delete user ok")
+
+# import json to pum
+exec(open("./api/import_plex_users.py").read())

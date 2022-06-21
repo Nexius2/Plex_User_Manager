@@ -6,6 +6,8 @@ import mysql.connector, os, sys, time
 root = Tk()
 root.title('Plex User Manager')
 #root.iconbitmap(r'./images/pum_logo.ico')
+#logo = PhotoImage(file='./images/pum_logo.png')
+#root.call('wm', 'iconphoto', root._w, logo)
 root.geometry("1100x800")
 
 
@@ -46,7 +48,7 @@ conf_tab: Frame = Frame(notebook)  # frame for conf page
 help_and_info_tab: Frame = Frame(notebook)  # frame for help & info page
 
 notebook.add(home_tab, text="Home")
-notebook.add(conf_tab, text="Conf")
+notebook.add(conf_tab, text="Settings")
 notebook.add(help_and_info_tab, text="Help & info")
 
 home_tab.configure(background="#1F1F1F")
@@ -98,6 +100,7 @@ cursor.execute("CREATE TABLE IF NOT EXISTS plexusers(first_name VARCHAR(255), \
      account_renewed_date DATE, \
      userID INT NOT NULL, \
      description VARCHAR(255), \
+     hidden INT(10) DEFAULT 0, \
      PRIMARY KEY(userID, serverName) );")
 
 # Create table tempusers
@@ -127,6 +130,8 @@ def query_user_info():
     db_user = userinfo["user"]
     db_passwd = userinfo["passwd"]
     db_db = userinfo["db"]
+    userinfo = config_object["CONF"]
+    hidden_str = userinfo["hide_guest"]
     # connect to MySQL
     mydb = mysql.connector.connect(
         host=db_host,
@@ -138,7 +143,10 @@ def query_user_info():
     cursor = mydb.cursor()
 
     # Select info from db
-    cursor.execute("SELECT * FROM plexusers;")
+    if hidden_str == "1":
+        cursor.execute("SELECT * FROM plexusers WHERE hidden = 0;")
+    else:
+        cursor.execute("SELECT * FROM plexusers;")
     records = cursor.fetchall()
     # Add our data to the screen
     global count
@@ -192,10 +200,11 @@ style.map('Treeview',
 # Create a Treeview Frame
 tree_frame = Frame(home_tab)
 tree_frame.configure(background="#1F1F1F")
-tree_frame.pack(fill="x", expand="yes", pady=10)
+tree_frame.pack(fill="x", expand=1, pady=10)
 
 # Create a Treeview Scrollbar
 tree_scroll = Scrollbar(tree_frame)
+tree_scroll.configure(background="#1F1F1F")
 tree_scroll.pack(side=RIGHT, fill=Y)
 
 # Create The Treeview
@@ -237,17 +246,17 @@ def select_record(e):
         # refresh page when is synced
         if os.path.isfile('./synced'):
             # display message box
-            global update_box
-            update_box = Toplevel(root)
-            update_box.title("information")
+            #global update_box
+            #update_box = Toplevel(root)
+            #update_box.title("information")
             #update_box.iconbitmap('./images/pum_logo.ico')
-            update_box.geometry("200x100")
-            update_box.config(bg="#282828")
-            update_box_label = Label(update_box, text="Updating...", bg="#282828", fg="white")
-            update_box_label.pack(pady="10")
-            update_box_frame = Frame(update_box, bg="#282828")
-            update_box_frame.pack(pady=5)
-            time.sleep(3)  # time for message
+            #update_box.geometry("200x100")
+            #update_box.config(bg="#282828")
+            #update_box_label = Label(update_box, text="Updating...", bg="#282828", fg="white")
+            #update_box_label.pack(pady="10")
+            #update_box_frame = Frame(update_box, bg="#282828")
+            #update_box_frame.pack(pady=5)
+            #time.sleep(3)  # time for message
             os.remove(str(''.join('./synced')))
             os.execl(sys.executable, os.path.abspath(__file__), *sys.argv)
 
@@ -316,6 +325,7 @@ def select_record(e):
         selected = my_tree.focus()
         # Grab record values
         values = my_tree.item(selected, 'values')
+        print(values)
 
         # Output entry boxes
         first_name_entry.insert(0, values[0])
@@ -547,16 +557,24 @@ mydb = mysql.connector.connect(
     database=db_db,
     auth_plugin='mysql_native_password')
 # Create a cursor and initialize it
+# count users
 cursor = mydb.cursor()
 sql_user_count = "SELECT COUNT(userID) FROM plexusers;"
 cursor.execute(sql_user_count)
+# count servers
 user_count_result = cursor.fetchall()
 sql_server_count = "SELECT COUNT(DISTINCT serverName) FROM plexusers;"
 cursor.execute(sql_server_count)
+# count sections
 server_count_result = cursor.fetchall()
 sql_library_count = "SELECT COUNT(DISTINCT sections) FROM plexusers;"
 cursor.execute(sql_library_count)
 library_count_result = cursor.fetchall()
+# display all servers
+server_list = "SELECT DISTINCT serverName FROM plexusers;"
+cursor.execute(server_list)
+global servers_result
+servers_result = cursor.fetchall()
 # Commit changes
 mydb.commit()
 # Close connexion
@@ -568,7 +586,7 @@ my_tree.tag_configure('evenrow', background="#2B2B2B")
 
 # Add Record Entry Boxes
 data_frame = LabelFrame(home_tab, text="User information")
-data_frame.pack(fill="x", expand="yes", padx=20)
+data_frame.pack(fill="x", expand=1, padx=20)
 
 # Configure the data_frame color
 data_frame.configure(background="#282828",
@@ -743,7 +761,7 @@ my_tree.bind("<ButtonRelease>", select_record)
 
 # Add plex info frame
 plex_info_frame = LabelFrame(home_tab, text="Plex Information")
-plex_info_frame.pack(fill="x", expand="yes", padx=20)
+plex_info_frame.pack(fill="x", expand=1, padx=20)
 
 # Configure the plex_info_frame color
 plex_info_frame.configure(background="#282828",
@@ -782,10 +800,68 @@ conf_frame.configure(background="#1F1F1F", border="0")  # color code 1F1F1F
 conf_frame.pack(padx=20, anchor="w", fill="x")
 # conf_tab page
 
+
+
+
+
+
+'''
+style.theme_create("pum_conf_theme", parent="alt", settings={
+        "TNotebook": {"configure": {"tabmargins": [2, 5, 2, 0],
+                                    "tabposition": 'ws',
+                                    "background": "#1F1F1F",
+                                    "borderwidth": "0",
+                                    }},
+        "TNotebook.Tab": {
+            "configure": {"padding": [30, 1],
+                          "background": "#1F1F1F",
+                          "foreground": "white",
+                          "borderwidth": "0",
+                          "fieldbackground": "#1F1F1F"},
+            "map":       {"background": [("selected", "#383838")],
+                          "foreground": [('selected', "#e5a00d")],
+                          "borderwidth": "0"}}})
+
+style.theme_use("pum_conf_theme")
+'''
+
+# set tabs
+notebook2 = ttk.Notebook(conf_frame, style='TNotebook')
+
+general_tab: Frame = Frame(notebook2)  # frame for general page
+communication_tab: Frame = Frame(notebook2)  # frame for communication page
+user_option_tab: Frame = Frame(notebook2)  # frame for user_option page
+gui_option_tab: Frame = Frame(notebook2)  # frame for gui_option page
+backup_restore_tab: Frame = Frame(notebook2)  # frame for backup_restore page
+
+notebook2.add(general_tab, text="General")
+notebook2.add(communication_tab, text="Communication")
+notebook2.add(user_option_tab, text="User options")
+notebook2.add(gui_option_tab, text="GUI options")
+notebook2.add(backup_restore_tab, text="Backup & Restore")
+
+general_tab.configure(background="#1F1F1F")
+#general_tab.pack(fill='both')
+communication_tab.configure(background="#1F1F1F")
+user_option_tab.configure(background="#1F1F1F")
+gui_option_tab.configure(background="#1F1F1F")
+backup_restore_tab.configure(background="#1F1F1F")
+# update_button.config(background="#e5a00d", activebackground="#383838", foreground="white", activeforeground="white", border="0", font='Helvetica 10 bold')
+notebook2.pack(expand=True, fill="both")  # expand to space not used
+
+
+
+
+
+
+
+
+'''
 #left frame
 left_conf_frame = LabelFrame(conf_frame)
 left_conf_frame.config(background="#1F1F1F", border="0")  # color code 1F1F1F
 left_conf_frame.pack(side=LEFT)
+'''
 # Read config.ini file
 config_object = ConfigParser()
 config_object.read(".config/pum.ini")
@@ -796,9 +872,20 @@ warn_user_near_expiration_delay = userinfo["warn_user_near_expiration_delay"]
 warn_user_account_expiration = userinfo["warn_user_account_expiration"]
 remove_user_access = userinfo["remove_user_access"]
 delete_user = userinfo["delete_user"]
-delete_user_delay = userinfo["delete_user_delay"]
-plex_db_sync = userinfo["plex_db_sync"]
-hide_guest = userinfo["hide_guest"]
+delete_user_delay_str = userinfo["delete_user_delay"]
+plex_db_sync_str = userinfo["plex_db_sync"]
+hide_guest_str = userinfo["hide_guest"]
+# cron_conf_str = userinfo["cron_conf"]
+nbr_backup_to_keep_str = userinfo["nbr_backup_to_keep"]
+# Read config.ini file for plex
+config_object = ConfigParser()
+config_object.read(".config/plexapi/config.ini")
+# Get the conf info
+userinfo = config_object["auth"]
+plex_url_str = userinfo["server_baseurl"]
+plex_token_str = userinfo["server_token"]
+
+
 # buttons
 # warn users of near expiration
 # function warn_user_near_expiration_command
@@ -809,14 +896,14 @@ def warn_user_near_expiration_command():
     with open(".config/pum.ini", 'w') as configfile:
         config_object.write(configfile)
 warn_user_near_expiration_but = IntVar(value=warn_user_near_expiration)
-Checkbutton(left_conf_frame, text="warn users of near expiration", variable=warn_user_near_expiration_but, onvalue=1, offvalue=0, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white", selectcolor="grey", takefocus="0", bd="0", command=warn_user_near_expiration_command).grid(row=0, column=0, padx=10, pady=10)
-delay_before_warning = Entry(left_conf_frame)
+Checkbutton(communication_tab, text="warn users of near expiration", variable=warn_user_near_expiration_but, onvalue=1, offvalue=0, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white", selectcolor="grey", takefocus="0", bd="0", command=warn_user_near_expiration_command).grid(row=0, column=0, padx=10, pady=10)
+delay_before_warning = Entry(communication_tab)
 delay_before_warning.delete(0, END)
 delay_before_warning.insert(0, warn_user_near_expiration_delay)
 delay_before_warning.grid(row=1, column=0, padx=10, pady=10)
-delay_before_warning_label = Label(left_conf_frame, text="(delay in days before expiration to warn user)")
+delay_before_warning_label = Label(communication_tab, text="(delay in days before expiration to warn user)")
 delay_before_warning_label.grid(row=1, column=1)
-delay_before_warning_label.config(background="#282828",
+delay_before_warning_label.config(background="#1F1F1F",
                         foreground="white")
 # warn users of account expiration
 # function warn_user_account_expiration_command
@@ -827,44 +914,122 @@ def warn_user_account_expiration_command():
     with open(".config/pum.ini", 'w') as configfile:
         config_object.write(configfile)
 warn_user_account_expiration_but = IntVar(value=warn_user_account_expiration)
-Checkbutton(left_conf_frame, text="warn users of account expiration", variable=warn_user_account_expiration_but, onvalue=1, offvalue=0, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white", selectcolor="grey", takefocus="0", bd="0", command=warn_user_account_expiration_command).grid(row=2, column=0, padx=10, pady=10)
-# remove access when account has expired
-# function remove_user_access_command
-def remove_user_access_command():
+Checkbutton(communication_tab, text="warn users of account expiration", variable=warn_user_account_expiration_but, onvalue=1, offvalue=0, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white", selectcolor="grey", takefocus="0", bd="0", command=warn_user_account_expiration_command).grid(row=2, column=0, padx=10, pady=10)
+
+#######################################
+#        Settings/User options        #
+#######################################
+def save_user_options_conf_command():
     config_object = ConfigParser()
     config_object.read(".config/pum.ini")
     config_object['CONF']['remove_user_access'] = str(remove_user_access_but.get())
-    with open(".config/pum.ini", 'w') as configfile:
-        config_object.write(configfile)
-remove_user_access_but = IntVar(value=remove_user_access)
-Checkbutton(left_conf_frame, text="remove access when account has expired", variable=remove_user_access_but, onvalue=1, offvalue=0, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white", selectcolor="grey", takefocus="0", bd="0", command=remove_user_access_command).grid(row=3, column=0, padx=10, pady=10)
-# delete user when expired
-# function delete_user_command
-def delete_user_command():
-    config_object = ConfigParser()
-    config_object.read(".config/pum.ini")
     config_object['CONF']['delete_user'] = str(delete_user_but.get())
+    config_object['CONF']['delete_user_delay'] = str(delete_user_conf.get())
     with open(".config/pum.ini", 'w') as configfile:
         config_object.write(configfile)
-delete_user_but = IntVar()
-Checkbutton(left_conf_frame, text="delete user when expired", variable=delete_user_but, onvalue=1, offvalue=0, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white", selectcolor="grey", takefocus="0", bd="0", command=delete_user_command).grid(row=4, column=0, padx=10, pady=10)
-delete_user_conf = Entry(left_conf_frame)
+
+# remove access when account has expired
+remove_user_access_but = IntVar(value=remove_user_access)
+Checkbutton(user_option_tab, text="remove access when account has expired", variable=remove_user_access_but, onvalue=1, offvalue=0, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white", selectcolor="grey", takefocus="0", bd="0").grid(row=0, column=0, sticky='w')
+remove_user_access_but_description_label = Label(user_option_tab, text="Librairies will be removed from user")
+remove_user_access_but_description_label.grid(row=1, column=0, sticky='w')
+remove_user_access_but_description_label.config(background="#1F1F1F",
+                        foreground="grey")
+# delete user when expired
+delete_user_but = IntVar(value=delete_user)
+Checkbutton(user_option_tab, text="delete user when expired", variable=delete_user_but, onvalue=1, offvalue=0, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white", selectcolor="grey", takefocus="0", bd="0").grid(row=2, column=0, sticky='w')
+delay_after_warning = Label(user_option_tab, text="Delay after warning", font=("helvetica, 10"))
+delay_after_warning.grid(row=3, column=0, sticky='w')
+delay_after_warning.config(background="#1F1F1F",
+                        foreground="white")
+delete_user_conf = Entry(user_option_tab, background="#555555", foreground="white", relief=FLAT)
 delete_user_conf.delete(0, END)
-delete_user_conf.insert(0, delete_user_delay)
-delete_user_conf.grid(row=5, column=0, padx=10, pady=10)
-delete_user_conf_label = Label(left_conf_frame, text="(delay in days after expiration to delete user)")
-delete_user_conf_label.grid(row=5, column=1)
-delete_user_conf_label.config(background="#282828",
-                        foreground="white")
+delete_user_conf.insert(0, delete_user_delay_str)
+delete_user_conf.grid(row=4, column=0, padx=3, sticky='w')
+delete_user_conf_label = Label(user_option_tab, text="Delay in days after expiration to delete user")
+delete_user_conf_label.grid(row=5, column=0, sticky='w')
+delete_user_conf_label.config(background="#1F1F1F",
+                        foreground="grey")
+save_user_options_settings_button = Button(user_option_tab, text="Save", command=save_user_options_conf_command)
+save_user_options_settings_button.grid(row=6, column=0, padx=3, pady=10, sticky='w')
+save_user_options_settings_button.config(background="#e5a00d", activebackground="#383838", foreground="white", activeforeground="white", border="0", font='Helvetica 10 bold')
+
+#######################################
+#           Settings/general          #
+#######################################
+# plex_sync_delay_conf_command function
+def save_general_conf_command():
+    pum_config_object = ConfigParser()
+    pum_config_object.read(".config/pum.ini")
+    pum_config_object['CONF']['plex_db_sync'] = str(plex_sync_delay_conf.get())
+    with open(".config/pum.ini", 'w') as pum_configfile:
+        pum_config_object.write(pum_configfile)
+    plex_config_object = ConfigParser()
+    plex_config_object.read(".config/plexapi/config.ini")
+    plex_config_object['auth']['server_baseurl'] = str(plex_url_conf.get())
+    plex_config_object['auth']['server_token'] = str(plex_token_conf.get())
+    with open(".config/plexapi/config.ini", 'w') as plex_configfile:
+        plex_config_object.write(plex_configfile)
+
 # Plex sync
-plex_sync_delay_conf = Entry(left_conf_frame)
+# plex_sync_conf_frame_left = Frame(general_tab, background="yellow", width=1)
+# plex_sync_conf_frame_left.configure(background="#1F1F1F")
+#plex_sync_conf_frame_right = Frame(general_tab, background="#1F1F1F", width=100)
+# plex_sync_conf_frame.pack(fill='both')
+plex_sync_delay_conf = Entry(general_tab, width=10, background="#555555", foreground="white", relief=FLAT)
 plex_sync_delay_conf.delete(0, END)
-plex_sync_delay_conf.insert(0, plex_db_sync)
-plex_sync_delay_conf.grid(row=6, column=0, padx=10, pady=10)
-plex_sync_delay_conf_label = Label(left_conf_frame, text="sync plex db every X hours (default: 24)")
-plex_sync_delay_conf_label.grid(row=6, column=1)
-plex_sync_delay_conf_label.config(background="#282828",
+plex_sync_delay_conf.insert(0, plex_db_sync_str)
+plex_sync_delay_conf.grid(row=1, column=0, padx=3, sticky='w')
+plex_sync_delay_conf_label = Label(general_tab, text="Plex db sync delay", font=("helvetica, 10"))
+plex_sync_delay_conf_label.grid(row=0, column=0, sticky='w')
+plex_sync_delay_conf_label.config(background="#1F1F1F",
                         foreground="white")
+plex_sync_delay_conf_label2 = Label(general_tab, text="sync will run every X hours (default: 24)")
+plex_sync_delay_conf_label2.grid(row=2, column=0, sticky='w')
+plex_sync_delay_conf_label2.config(background="#1F1F1F",
+                        foreground="#555555")
+
+# Plex conf
+plex_url_conf = Entry(general_tab, width=25, background="#555555", foreground="white", relief=FLAT)
+plex_url_conf.delete(0, END)
+plex_url_conf.insert(0, plex_url_str)
+plex_url_conf.grid(row=4, column=0, padx=3, sticky='w')
+plex_url_conf_label = Label(general_tab, text="Plex URL", font=("helvetica, 10"))
+plex_url_conf_label.grid(row=3, column=0, sticky='w')
+plex_url_conf_label.config(background="#1F1F1F",
+                        foreground="white")
+plex_token_conf = Entry(general_tab, width=25, background="#555555", foreground="white", relief=FLAT)
+plex_token_conf.delete(0, END)
+plex_token_conf.insert(0, plex_token_str)
+plex_token_conf.grid(row=6, column=0, padx=3, sticky='w')
+plex_token_conf_label = Label(general_tab, text="Plex token", font=("helvetica, 10"))
+plex_token_conf_label.grid(row=5, column=0, sticky='w')
+plex_token_conf_label.config(background="#1F1F1F",
+                        foreground="white")
+save_general_settings_button = Button(general_tab, text="Save", command=save_general_conf_command)
+save_general_settings_button.grid(row=7, column=0, padx=3, pady=10, sticky='w')
+save_general_settings_button.config(background="#e5a00d", activebackground="#383838", foreground="white", activeforeground="white", border="0", font='Helvetica 10 bold')
+
+#######################################
+#      Settings/Backup & restore      #
+#######################################
+nbr_backup_to_keep_conf = Entry(backup_restore_tab, width=3)
+nbr_backup_to_keep_conf.delete(0, END)
+nbr_backup_to_keep_conf.insert(0, nbr_backup_to_keep_str)
+nbr_backup_to_keep_conf.grid(row=0, column=1, padx=10, pady=10)
+nbr_backup_to_keep_conf_label = Label(backup_restore_tab, text="Keep backup for")
+nbr_backup_to_keep_conf_label.grid(row=0, column=0)
+nbr_backup_to_keep_conf_label.config(background="#1F1F1F",
+                        foreground="white")
+nbr_backup_to_keep_conf_label = Label(backup_restore_tab, text="days")
+nbr_backup_to_keep_conf_label.grid(row=0, column=2)
+nbr_backup_to_keep_conf_label.config(background="#1F1F1F",
+                        foreground="white")
+
+
+#######################################
+#        Settings/GUI options         #
+#######################################
 # Hide Guest
 # function hide_guest_command
 def hide_guest_command():
@@ -873,19 +1038,60 @@ def hide_guest_command():
     config_object['CONF']['hide_guest'] = str(hide_guest_but.get())
     with open(".config/pum.ini", 'w') as configfile:
         config_object.write(configfile)
-hide_guest_but = IntVar(value=hide_guest)
-Checkbutton(left_conf_frame, text="Hide Guest user", variable=hide_guest_but, onvalue=1, offvalue=0, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white", selectcolor="grey", takefocus="0", bd="0", command=hide_guest_command).grid(row=7, column=0, padx=10, pady=10)
+    # mark as synced to reload treeview
+    synced = open('./synced', "w")
+    synced.close()
+hide_guest_but = IntVar(value=hide_guest_str)
+Checkbutton(gui_option_tab, text="Hide Guest user", variable=hide_guest_but, onvalue=1, offvalue=0, activeforeground="#e5a00d", activebackground="#1F1F1F", background="#1F1F1F", foreground="white", selectcolor="grey", takefocus="0", bd="0", command=hide_guest_command).grid(row=7, column=0, padx=10, pady=10)
+
+# display server list
+# print(servers_result[0])
+# drop down menu
+def drop_menu_server_lit():
+    #drop_menu_server_lit_label = Label(left_conf_frame, text=clicked.get()).grid(row=8, column=2, padx=10, pady=10)
+    selected_server = clicked.get()
+
+    print(selected_server[2:-3])
+    print(type(selected_server))
+    # connect to MySQL
+    mydb = mysql.connector.connect(
+        host=db_host,
+        user=db_user,
+        passwd=db_passwd,
+        database=db_db,
+        auth_plugin='mysql_native_password')
+    # Create a cursor and initialize it
+    cursor = mydb.cursor()
+    # sql_remove_servers = "DELETE FROM plexusers WHERE serverName = %s;" % (selected_server[2:-3])
+    sql_remove_servers = "UPDATE plexusers SET is_on_plex = 0, hidden = 1 WHERE serverName = '%s';" % (selected_server[2:-3])
+    cursor.execute(sql_remove_servers,)
+    # mark as synced to hide old servers
+    synced = open('./synced', "w")
+    synced.close()
+    # Commit changes
+    mydb.commit()
+    # Close connexion
+    mydb.close()
+clicked = StringVar()
+clicked.set(servers_result[0])
+drop_menu = OptionMenu(gui_option_tab, clicked, *servers_result)
+drop_menu.grid(row=8, column=0, padx=10, pady=10)
+drop_menu_button = Button(gui_option_tab, text="Delete selected server entries", command=drop_menu_server_lit).grid(row=8, column=1, padx=10, pady=10)
+
+
 
 # serapation
 #sep = ttk.Separator(conf_frame, orient='vertical')
 #sep.pack(padx="5", pady="5", fill="y", expand="true")
+'''
 # conf right panel
 right_conf_frame = LabelFrame(conf_frame)
 right_conf_frame.config(background="#1F1F1F", border="0")  # color code 1F1F1F
 right_conf_frame.pack(side=RIGHT)
-email_text_label = Label(right_conf_frame, text="desciption for email conf")
-email_text_label.grid(row=0, column=0)
-email_text_label.config(background="#282828",
+'''
+email_text_label = Label(communication_tab, text="desciption for email conf")
+email_text_label.grid(row=10, column=0)
+email_text_label.config(background="#1F1F1F",
                         foreground="white")
 
 # help & info frame

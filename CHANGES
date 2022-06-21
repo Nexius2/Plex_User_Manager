@@ -1,3 +1,13 @@
+V0.42
+- command to change plex url & token
+- graphical changes on general an user option tab
+- general and user options tab completely functionnal
+- hide guest user function added 
+- removed servers don't appear in treeview anymore
+V0.41
+- added delete server function
+- added more settings
+- added plex url & token setting
 V0.40
 - added CHANGES
 - changed dates for expired account to work in docker

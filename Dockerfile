@@ -4,7 +4,7 @@ LABEL maintainer="Nexius2" \
       version="0.2"
 COPY . /
 ENV TZ=Europe/Paris
-ENV CONFIG_PATH=./.test/plexapi/config.ini
+ENV CONFIG_PATH=./.config/plexapi/config.ini
 ARG DEBIAN_FRONTEND=noninteractive
 RUN echo "**** install system packages ****" \
  && apt-get update \
@@ -13,12 +13,7 @@ RUN echo "**** install system packages ****" \
  && wget https://raw.githubusercontent.com/blacktwin/JBOPS/master/utility/plex_api_share.py \
  # && wget https://raw.githubusercontent.com/blacktwin/JBOPS/master/utility/plex_api_share.py -P ./api/ \
  && pip3 install --no-cache-dir --upgrade --requirement /requirements.txt \
- && apt-get clean \
- && apt-get update \
- && apt-get check \
- && apt-get -f install \
- && apt-get autoclean \
- && rm -rf /requirements.txt /tmp/* /var/tmp/* /var/lib/apt/lists/*
-ENTRYPOINT ["python3", "pum_web.py"]
+ # && rm -rf /requirements.txt /tmp/* /var/tmp/* /var/lib/apt/lists/*
+ENTRYPOINT ["python3"]
 # run script 
-CMD ["python3", "sync.py"]
+CMD ["./pum_web.py"]
