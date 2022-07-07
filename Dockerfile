@@ -11,9 +11,9 @@ RUN echo "**** install system packages ****" \
  && apt-get upgrade -y --no-install-recommends \
  && apt-get install -y python3 python3-pip python3-tk mysql-server tzdata wget \
  && wget https://raw.githubusercontent.com/blacktwin/JBOPS/master/utility/plex_api_share.py \
- # && wget https://raw.githubusercontent.com/blacktwin/JBOPS/master/utility/plex_api_share.py -P ./api/ \
+ # && wget https://raw.githubusercontent.com/blacktwin/JBOPS/master/utility/plex_api_share.py -P ./ \
  && pip3 install --no-cache-dir --upgrade --requirement /requirements.txt \
  # && rm -rf /requirements.txt /tmp/* /var/tmp/* /var/lib/apt/lists/*
 ENTRYPOINT ["python3"]
 # run script 
-CMD ["./pum_web.py"]
+CMD ["./pum.py"]

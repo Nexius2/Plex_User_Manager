@@ -1,3 +1,16 @@
+v0.44
+- all pum process killed on exit
+V0.43
+- added plexservers and plexlibraries libraries
+- added server tab
+- GUI code optimisation
+- offline servers now detected
+- servers can be deleted and added
+- sections are now seen in user menu
+- hide guest and hide users with no libraries done
+- some minor bugs
+- user can now be removed from plex
+- PUM now can syn on standalone (default every 24H)
 V0.42
 - command to change plex url & token
 - graphical changes on general an user option tab
