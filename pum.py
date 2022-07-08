@@ -86,6 +86,9 @@ style.map('Treeview',
 # **********************************************************************************************************************
 # ************************************************* VARIABLES **********************************************************
 # **********************************************************************************************************************
+# var for new servers
+NEW_PLEX_SERVER = ""
+
 # global config_path
 config_path = ".config/"
 api_path = "api/"
@@ -200,10 +203,10 @@ def db_create():
 # *********************************************** import data **********************************************************
 # **********************************************************************************************************************
 def import_data():
+    global NEW_PLEX_SERVER, NEW_PLEX_URL, NEW_PLEX_TOKEN
     root.title('Plex User Manager... loading data...')
     config_path = ".config/"
     api_path = "api/"
-
     # DB connection
     # Read config.ini file
     config_object = ConfigParser()
@@ -223,9 +226,43 @@ def import_data():
         auth_plugin='mysql_native_password')
     # Create a cursor and initialize it
     cursor = mydb.cursor()
-    cursor.execute("SELECT * FROM plexservers WHERE server_offline = 0;")
-    records = cursor.fetchall()
 
+    # clean old entries
+    cursor.execute(
+        "SELECT * FROM plexfilterMovies WHERE NOT EXISTS(SELECT NULL FROM plexusers WHERE plexusers.email = plexfilterMovies.email);")
+    deleted_filterMovies = cursor.fetchall()
+    for delet_filtMov in deleted_filterMovies:
+        cursor.execute("DELETE FROM plexfilterMovies WHERE serverName = %s AND email = %s AND library = %s;",
+                       [delet_filtMov[0], delet_filtMov[1], delet_filtMov[2]])
+        print("Old entry : filterMovies " + delet_filtMov[2] + " has been removed on server " + delet_filtMov[0] + " for user " +
+              delet_filtMov[1])
+    cursor.execute(
+        "SELECT * FROM plexfilterMusic WHERE NOT EXISTS(SELECT NULL FROM plexusers WHERE plexusers.email = plexfilterMusic.email);")
+    deleted_filterMusic = cursor.fetchall()
+    for delet_filtMus in deleted_filterMusic:
+        cursor.execute("DELETE FROM plexfilterMusic WHERE serverName = %s AND email = %s AND library = %s;",
+                       [delet_filtMus[0], delet_filtMus[1], delet_filtMus[2]])
+        print("Old entry : filterMusic " + delet_filtMus[2] + " has been removed on server " + delet_filtMus[0] + " for user " +
+              delet_filtMus[1])
+    cursor.execute(
+        "SELECT * FROM plexfilterTelevision WHERE NOT EXISTS(SELECT NULL FROM plexusers WHERE plexusers.email = plexfilterTelevision.email);")
+    deleted_filterTelevision = cursor.fetchall()
+    for delet_filtTV in deleted_filterTelevision:
+        cursor.execute("DELETE FROM plexfilterTelevision WHERE serverName = %s AND email = %s AND library = %s;",
+                       [delet_filtTV[0], delet_filtTV[1], delet_filtTV[2]])
+        print("Old entry : filterTelevision " + delet_filtTV[2] + " has been removed on server " + delet_filtTV[0] + " for user " + delet_filtTV[1])
+    cursor.execute(
+        "SELECT * FROM plexlibraries WHERE NOT EXISTS(SELECT NULL FROM plexusers WHERE plexusers.email = plexlibraries.email);")
+    deleted_libraries = cursor.fetchall()
+    for delet_lib in deleted_libraries:
+        cursor.execute("DELETE FROM plexlibraries WHERE serverName = %s AND email = %s AND library = %s;", [delet_lib[0], delet_lib[1], delet_lib[2]])
+        print("Old entry : library " + delet_lib[2] + " has been removed on server " + delet_lib[0] + " for user " + delet_lib[1])
+
+    if NEW_PLEX_SERVER:
+        records = [NEW_PLEX_SERVER, NEW_PLEX_URL, NEW_PLEX_TOKEN]
+    else:
+        cursor.execute("SELECT * FROM plexservers WHERE server_offline = 0;")
+        records = cursor.fetchall()
     for record in records:
         #serverName = record[0]
         PLEX_TOKEN = record[1]
@@ -268,6 +305,7 @@ def import_data():
             # export json from plex
             os.system("python3 plex_api_share.py --backup")
             print(serverName + " json created")
+            NEW_PLEX_SERVER = ""
 
     # empty table tempusers
     cursor.execute("TRUNCATE TABLE tempusers;")
@@ -349,6 +387,9 @@ def import_data():
 
             # add to temp db to compare
             cursor.execute("INSERT IGNORE INTO tempusers SET userID = %s, serverName = %s;", [mydict['userID'], mydict['serverName']])
+    print("json files imported to db")
+
+
 
     # delete old json file
     app_dir = os.listdir(os.getcwd())
@@ -378,9 +419,9 @@ def multithreading_import_data():
 
 def sync_data():
     #time.sleep(86400)
-    time.sleep(int(sync_plex_delai))
+    time.sleep(int(sync_plex_delai)*3600)
     multithreading_import_data()
-    print("data synced")
+    print("waited for " + sync_plex_delai + " Hours, data synced")
     # clear my_server_tree
     my_user_tree.delete(*my_user_tree.get_children())
     # get server data back
@@ -623,13 +664,31 @@ def select_user_record(e):
         channels_entry.insert(0, values[9])
         channels_entry.config(state="disabled",
                               disabledbackground="#282828")
-        filterMovies_entry.insert(0, values[10])
+        # get the filterMovies for selected user
+        cursor.execute("SELECT filterMovies FROM plexfilterMovies WHERE email = %s AND serverName = %s;",
+                       [values[3], values[4]])
+        user_filterMovies = cursor.fetchall()
+        # display filterMovies in clean way
+        for filterMovies in user_filterMovies:
+            filterMovies_entry.insert(0, filterMovies[0] + " - ")
         filterMovies_entry.config(state="disabled",
                                   disabledbackground="#282828")
-        filterMusic_entry.insert(0, values[11])
+        # get the filterMusic for selected user
+        cursor.execute("SELECT filterMusic FROM plexfilterMusic WHERE email = %s AND serverName = %s;",
+                       [values[3], values[4]])
+        user_filterMusic = cursor.fetchall()
+        # display filterMovies in clean way
+        for filterMusic in user_filterMusic:
+            filterMusic_entry.insert(0, filterMusic[0] + " - ")
         filterMusic_entry.config(state="disabled",
                                  disabledbackground="#282828")
-        filterTelevision_entry.insert(0, values[12])
+        # get the filterTelevision for selected user
+        cursor.execute("SELECT filterTelevision FROM plexfilterTelevision WHERE email = %s AND serverName = %s;",
+                       [values[3], values[4]])
+        user_filterTelevision = cursor.fetchall()
+        # display filterTelevision in clean way
+        for filterTelevision in user_filterTelevision:
+            filterTelevision_entry.insert(0, filterTelevision[0] + " - ")
         filterTelevision_entry.config(state="disabled",
                                       disabledbackground="#282828")
         title_entry.insert(0, values[13])
@@ -729,6 +788,7 @@ def update_user_record():
     # Close connexion
     mydb.close()
 
+# delete user
 def delete_user():
     # DB connection
     # Read config.ini file
@@ -867,13 +927,194 @@ def delete_user():
     # get server data back
     query_user_info()
 
+# add user
+def add_user():
+    #exec(open("./modules/add_plex_user.py").read())
+    add_user_window = Toplevel(root)
+    add_user_window.title('Plex User Manager: adding user')
+    add_user_window.geometry("900x700")
+    add_user_window.configure(bg="#282828")
+
+
+
+    config_path = ".config/"
+    # DB connection
+    # Read config.ini file
+    config_object = ConfigParser()
+    config_object.read(config_path + "pum.ini")
+    # Get the conf info
+    userinfo = config_object["DATABASE"]
+    db_host = userinfo["host"]
+    db_user = userinfo["user"]
+    db_passwd = userinfo["passwd"]
+    db_db = userinfo["db"]
+
+    # connect to MySQL
+    mydb = mysql.connector.connect(
+        host=db_host,
+        user=db_user,
+        passwd=db_passwd,
+        database=db_db,
+        auth_plugin='mysql_native_password')
+    # Create a cursor and initialize it
+    cursor = mydb.cursor()
+
+    # add the user
+    def add_user_command():
+        import re
+        config_path = ".config/"
+        # DB connection
+        # Read config.ini file
+        config_object = ConfigParser()
+        config_object.read(config_path + "pum.ini")
+        # Get the conf info
+        userinfo = config_object["DATABASE"]
+        db_host = userinfo["host"]
+        db_user = userinfo["user"]
+        db_passwd = userinfo["passwd"]
+        db_db = userinfo["db"]
+
+        # connect to MySQL
+        mydb = mysql.connector.connect(
+            host=db_host,
+            user=db_user,
+            passwd=db_passwd,
+            database=db_db,
+            auth_plugin='mysql_native_password')
+        # Create a cursor and initialize it
+        cursor = mydb.cursor()
+        # global selected_server
+        print("email : " + email_entry.get())
+        # global selected_server
+        print("server : " + server_clicked.get()[2:-3])
+        add_user_library_selected = ''
+        for add_user_library_selected_item in library_listbox.curselection():
+            add_user_library_selected = add_user_library_selected + str(library_listbox.get(add_user_library_selected_item))
+        #print("selected libraries " + add_user_library_selected)
+        add_user_library_selected = re.sub(r"[\(\)]", '', add_user_library_selected)
+        add_user_library_selected = add_user_library_selected.replace(',', ' ')
+
+        #get server token and url
+        cursor.execute("SELECT * FROM plexservers WHERE serverName = %s;", [server_clicked.get()[2:-3]])
+        selected_plex_info = cursor.fetchall()
+        #print(type(selected_plex_info))
+        new_selected_plex_info = selected_plex_info[0]
+        PLEX_URL = str(new_selected_plex_info[2])
+        PLEX_TOKEN = str(new_selected_plex_info[1])
+        # write to plex_api config.ini
+        plex_config_object = ConfigParser()
+        plex_config_object.read(plexapi.CONFIG_PATH)
+        plex_config_object['auth']['server_baseurl'] = PLEX_URL
+        plex_config_object['auth']['server_token'] = PLEX_TOKEN
+        with open(plexapi.CONFIG_PATH, 'w') as plex_configfile:
+            plex_config_object.write(plex_configfile)
+        # export json from plex
+        os.system("python3 plex_api_invite.py --user " + email_entry.get() + " --libraries " + add_user_library_selected)
+        print("plex_api_invite.py --user " + email_entry.get() + " --libraries " + add_user_library_selected)
+        #print(PLEX_TOKEN)
+        #print(PLEX_URL)
+        # Commit changes
+        mydb.commit()
+        # Close connexion
+        mydb.close()
+        add_user_window.destroy()
+
+
+    # library selection
+    def select_library(server_clicked):
+        config_path = ".config/"
+        # DB connection
+        # Read config.ini file
+        config_object = ConfigParser()
+        config_object.read(config_path + "pum.ini")
+        # Get the conf info
+        userinfo = config_object["DATABASE"]
+        db_host = userinfo["host"]
+        db_user = userinfo["user"]
+        db_passwd = userinfo["passwd"]
+        db_db = userinfo["db"]
+
+        # connect to MySQL
+        mydb = mysql.connector.connect(
+            host=db_host,
+            user=db_user,
+            passwd=db_passwd,
+            database=db_db,
+            auth_plugin='mysql_native_password')
+        # Create a cursor and initialize it
+        cursor = mydb.cursor()
+
+        # library selection
+        cursor.execute("SELECT DISTINCT library FROM plexlibraries WHERE serverName = %s;", [server_clicked[0]])
+        library_result = cursor.fetchall()
+        library_listbox.delete(0, END)
+        library_listbox.insert(0, *library_result)
+
+        #for lib_result in library_result:
+        #print(library_result)
+
+
+        # Commit changes
+        mydb.commit()
+        # Close connexion
+        mydb.close()
+
+    # email entry
+    email_label = Label(add_user_window, text="new user email : ")
+    email_label.grid(row=0, column=0, padx=10, pady=30, sticky=W)
+    email_label.config(background="#282828",
+                       foreground="white")
+    email_entry = Entry(add_user_window, width=30)
+    email_entry.grid(row=0, column=1, padx=10, pady=10, sticky=W)
+
+    # server selection
+    cursor.execute("SELECT serverName FROM plexservers;")
+    server_records = cursor.fetchall()
+    server_selection_label = Label(add_user_window, text="select server to add user ")
+    server_selection_label.grid(row=1, column=0, padx=10, pady=10, sticky=W)
+    server_selection_label.config(background="#282828",
+                                  foreground="white")
+    server_clicked = StringVar()
+    server_clicked.set("select server")
+    server_name_drop = OptionMenu(add_user_window, server_clicked, *server_records, command=select_library) #, command=select_library
+    server_name_drop.grid(row=1, column=1, padx=10, pady=10, sticky=W)
+    global selected_server
+    selected_server = server_clicked.get()[2:-3]
+
+    library_selection_label = Label(add_user_window, text="select library to add to user ")
+    library_selection_label.grid(row=1, column=2, padx=10, pady=10, sticky=W)
+    library_selection_label.config(background="#282828",
+                                   foreground="white")
+
+    #library_frame_for_user = Frame(add_user_window)
+    #library_for_user_scrollbar = Scrollbar(add_user_window, orient=VERTICAL)
+
+    library_listbox = Listbox(add_user_window, selectmode=MULTIPLE) #, yscrollcommand=library_for_user_scrollbar.set)
+    #library_for_user_scrollbar.config(command=library_listbox.yview)
+    library_listbox.grid(row=1, column=3, padx=10, pady=10, sticky=W)
+    #library_for_user_scrollbar.grid(sticky=E)
+
+
+    #library_listbox.insert(0, *library_result)
+
+
+
+
+
+    create_user_button = Button(add_user_window, text="add user", command=add_user_command)
+    create_user_button.grid(row=20, column=0, padx=10, pady=10, sticky='W')
+
+    # Commit changes
+    mydb.commit()
+    # Close connexion
+    mydb.close()
 
 # Create Striped Row Tags
 my_user_tree.tag_configure('oddrow', background="#303030")
 my_user_tree.tag_configure('evenrow', background="#2B2B2B")
 
 # Add Record Entry Boxes
-user_data_frame = LabelFrame(user_tab, text="User information")
+user_data_frame = LabelFrame(user_tab, text="Selected User Information")
 user_data_frame.pack(fill="x", expand=1, padx=20)
 
 # Configure the user_data_frame color
@@ -1050,6 +1291,17 @@ delete_user_button.config(background="#e5a00d", activebackground="#383838", fore
 
 # Bind the treeview
 my_user_tree.bind("<ButtonRelease>", select_user_record)
+
+# Add user frame
+plex_user_option_frame = LabelFrame(user_tab, text="Plex User Options")
+plex_user_option_frame.pack(fill="x", expand=1, padx=20)
+# Configure the plex_add_user_frame color
+plex_user_option_frame.configure(background="#282828",
+                               foreground="white")
+# add user button
+add_user_button = Button(plex_user_option_frame, text="Add user", command=add_user)
+add_user_button.grid(row=200, column=200, padx=10, pady=10)
+add_user_button.config(background="#e5a00d", activebackground="#383838", foreground="white", activeforeground="white", border="0", font='Helvetica 10 bold')
 
 # user count
 cursor.execute("SELECT COUNT(DISTINCT userID) FROM plexusers;")
@@ -1230,6 +1482,8 @@ def add_server_record():
     # Close connexion
     mydb.close()
     # import data from new server
+    global NEW_PLEX_SERVER
+    NEW_PLEX_SERVER = "plex.friendlyName"
     multithreading_import_data()
     # clear my_server_tree
     my_server_tree.delete(*my_server_tree.get_children())
@@ -1320,13 +1574,6 @@ server_offline_entry = Entry(server_data_frame, width=30)
 server_offline_entry.grid(row=0, column=3, padx=10, pady=10)
 server_offline_entry.config(state="disabled",
                             disabledbackground="#282828")
-
-
-'''server_clicked = StringVar()
-server_clicked.set(records[0])
-
-server_name_drop = OptionMenu(server_data_frame, server_clicked, *records)
-server_name_drop.grid(row=0, column=0, padx=10, pady=10)'''
 
 # delete server button
 delete_server_button = Button(server_data_frame, text="Delete Record", command=delete_server_record)
@@ -1518,7 +1765,7 @@ remove_user_access_but_description_label.config(background="#1F1F1F",
                                                 foreground="grey")
 
 # sync app with plex entry
-sync_plex_delai_label = Label(general_tab, text="delay in seconds, between every plex sync (default is 86400 / 24H)")
+sync_plex_delai_label = Label(general_tab, text="delay in seconds, between every plex sync (default is 24 Hours)")
 sync_plex_delai_label.grid(row=4, column=0, padx=10, pady=10, sticky='w')
 sync_plex_delai_label.config(background="#1F1F1F",
                              foreground="white")
@@ -1545,7 +1792,7 @@ delete_user_conf_label.config(background="#1F1F1F",
                         foreground="grey")
 '''
 save_user_options_settings_button = Button(general_tab, text="Save", command=save_user_options_conf_command)
-save_user_options_settings_button.grid(row=20, column=0, padx=100, pady=10, sticky='W')
+save_user_options_settings_button.grid(row=20, column=0, padx=300, pady=10, sticky='W')
 save_user_options_settings_button.config(background="#e5a00d", activebackground="#383838", foreground="white", activeforeground="white", border="0", font='Helvetica 10 bold')
 
 

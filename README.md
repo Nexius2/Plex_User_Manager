@@ -14,11 +14,9 @@ left to do:
 - build docker container to run plex sync every cron schedule, display pum_web.py and ask for plex url and token (config.ini)
 - add help text
 - add CHANGES to info tab
-- add user function (plex_api_invite)
 
 bugs:
-- when selecting help & info selection touring appears (focus)
-- filters not displaying
+- minor gui diplay glitch
 
 Usage:
  - run python3 pum.py

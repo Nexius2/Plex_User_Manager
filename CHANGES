@@ -1,5 +1,9 @@
 v0.44
 - all pum process killed on exit
+- when adding a server, only this one syncs
+- all filters now display correctly
+- clean old entries while syncing
+- add user panel
 V0.43
 - added plexservers and plexlibraries libraries
 - added server tab
