@@ -1,3 +1,5 @@
+v0.45
+- libraries will be removed from expired users 
 v0.44
 - all pum process killed on exit
 - when adding a server, only this one syncs

@@ -217,6 +217,13 @@ def import_data():
     db_user = userinfo["user"]
     db_passwd = userinfo["passwd"]
     db_db = userinfo["db"]
+
+    # Read config.ini file
+    config_object = ConfigParser()
+    config_object.read(config_path + "pum.ini")
+    # Get the conf info
+    userinfo = config_object["CONF"]
+    remove_user_access = userinfo["remove_user_access"]
     # connect to MySQL
     mydb = mysql.connector.connect(
         host=db_host,
@@ -257,6 +264,54 @@ def import_data():
     for delet_lib in deleted_libraries:
         cursor.execute("DELETE FROM plexlibraries WHERE serverName = %s AND email = %s AND library = %s;", [delet_lib[0], delet_lib[1], delet_lib[2]])
         print("Old entry : library " + delet_lib[2] + " has been removed on server " + delet_lib[0] + " for user " + delet_lib[1])
+
+    # remove user access if expired
+    if remove_user_access == "1":
+        cursor.execute("SELECT email, serverName FROM plexusers WHERE account_expire_date < CURDATE() AND NOT (SELECT email FROM plexlibraries WHERE plexusers.email = plexlibraries.email AND plexusers.serverName = plexlibraries.serverName);")
+        expired_user = cursor.fetchall()
+        #print(expired_user)
+        for exp_usr in expired_user:
+            usr_job = expired_user[0]
+            config_path = ".config/"
+            # DB connection
+            # Read config.ini file
+            config_object = ConfigParser()
+            config_object.read(config_path + "pum.ini")
+            # Get the conf info
+            userinfo = config_object["DATABASE"]
+            db_host = userinfo["host"]
+            db_user = userinfo["user"]
+            db_passwd = userinfo["passwd"]
+            db_db = userinfo["db"]
+
+            # connect to MySQL
+            mydb = mysql.connector.connect(
+                host=db_host,
+                user=db_user,
+                passwd=db_passwd,
+                database=db_db,
+                auth_plugin='mysql_native_password')
+            # Create a cursor and initialize it
+            cursor = mydb.cursor()
+            # get server token and url
+            cursor.execute("SELECT * FROM plexservers WHERE serverName = %s;", [usr_job[1]])
+            selected_plex_info = cursor.fetchall()
+            # print(type(selected_plex_info))
+            new_selected_plex_info = selected_plex_info[0]
+            PLEX_URL = str(new_selected_plex_info[2])
+            PLEX_TOKEN = str(new_selected_plex_info[1])
+            # write to plex_api config.ini
+            plex_config_object = ConfigParser()
+            plex_config_object.read(plexapi.CONFIG_PATH)
+            plex_config_object['auth']['server_baseurl'] = PLEX_URL
+            plex_config_object['auth']['server_token'] = PLEX_TOKEN
+            with open(plexapi.CONFIG_PATH, 'w') as plex_configfile:
+                plex_config_object.write(plex_configfile)
+            # export json from plex
+            os.system("python3 plex_api_share.py --unshare --user " + usr_job[0])
+            cursor.execute("UPDATE plexusers SET sections = 'NULL' WHERE email = %s AND serverName = %s;", [usr_job[0], usr_job[1]])
+            print("unshare all libraries for user " + usr_job[0] + " on server " + usr_job[1])
+
 
     if NEW_PLEX_SERVER:
         records = [NEW_PLEX_SERVER, NEW_PLEX_URL, NEW_PLEX_TOKEN]

@@ -7,9 +7,8 @@ I'd be glad to have some help with python and docker(GitHub).
 left to do:
 - in conf tab buttons are done functions not yet working
   * add mail conf to send mail before
-  * warn users near expiation (with delay)
-  * warn user of expiration
-  * remove access when expired auth issue with plex_api_share
+  * warn users near expiation (with delay / mail)
+  * warn user of expiration (mail)
   * delete user when expired (with delay)
 - build docker container to run plex sync every cron schedule, display pum_web.py and ask for plex url and token (config.ini)
 - add help text
