@@ -1820,7 +1820,7 @@ remove_user_access_but_description_label.config(background="#1F1F1F",
                                                 foreground="grey")
 
 # sync app with plex entry
-sync_plex_delai_label = Label(general_tab, text="delay in seconds, between every plex sync (default is 24 Hours)")
+sync_plex_delai_label = Label(general_tab, text="delay in hours, between every plex sync (default is 24 Hours)")
 sync_plex_delai_label.grid(row=4, column=0, padx=10, pady=10, sticky='w')
 sync_plex_delai_label.config(background="#1F1F1F",
                              foreground="white")

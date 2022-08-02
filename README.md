@@ -10,7 +10,7 @@ left to do:
   * warn users near expiation (with delay / mail)
   * warn user of expiration (mail)
   * delete user when expired (with delay)
-- build docker container to run plex sync every cron schedule, display pum_web.py and ask for plex url and token (config.ini)
+- build docker container to display pum_web.py
 - add help text
 - add CHANGES to info tab
 
