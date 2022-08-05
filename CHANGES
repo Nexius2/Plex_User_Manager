@@ -1,3 +1,6 @@
+v0.46
+- add user visualy completed
+- corrected expired users not removed from plexlibraries DB
 v0.45
 - libraries will be removed from expired users 
 v0.44

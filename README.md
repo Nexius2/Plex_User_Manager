@@ -9,7 +9,6 @@ left to do:
   * add mail conf to send mail before
   * warn users near expiation (with delay / mail)
   * warn user of expiration (mail)
-  * delete user when expired (with delay)
 - build docker container to display pum_web.py
 - add help text
 - add CHANGES to info tab

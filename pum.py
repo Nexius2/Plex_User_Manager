@@ -29,7 +29,7 @@ style.theme_create("pum_theme", parent="alt", settings={
                                     "tabposition": 'ne',
                                     "background": "#1F1F1F",
                                     "borderwidth": "0",
-#                                    "font": "Helvetica 10 bold",
+#                                   "font": "Helvetica 10 bold",
                                     }},
         "TNotebook.Tab": {
             "configure": {"padding": [30, 1],
@@ -70,12 +70,12 @@ style.configure('Treeview.Heading',
 
 # Configure the Treeview Colors
 style.configure("Treeview",
-                background="#D3D3D3",
+                background="#282828",
                 foreground="white",
                 rowheight=25,
                 relief="flat",
                 borderwidth=0,
-                fieldbackground="#D3D3D3")
+                fieldbackground="#282828")
 
 # Change Selected Color
 style.map('Treeview',
@@ -311,6 +311,7 @@ def import_data():
             os.system("python3 plex_api_share.py --unshare --user " + usr_job[0])
             cursor.execute("UPDATE plexusers SET sections = 'NULL' WHERE email = %s AND serverName = %s;", [usr_job[0], usr_job[1]])
             print("unshare all libraries for user " + usr_job[0] + " on server " + usr_job[1])
+            cursor.execute("DELETE FROM plexlibraries WHERE email = %s AND serverName = %s;", [usr_job[0], usr_job[1]])
 
 
     if NEW_PLEX_SERVER:
@@ -989,6 +990,25 @@ def add_user():
     add_user_window.title('Plex User Manager: adding user')
     add_user_window.geometry("900x700")
     add_user_window.configure(bg="#282828")
+    # create add user frame
+    add_user_frame = Frame(add_user_window)
+    add_user_frame.pack(fill=BOTH, expand=1)
+    # create add user canvas
+    add_user_canvas = Canvas(add_user_frame)
+    add_user_canvas.pack(side=LEFT, fill=BOTH, expand=1)
+    # Create a add user Scrollbar
+    add_user_tree_scroll = ttk.Scrollbar(add_user_frame, orient=VERTICAL, command=add_user_canvas.yview)
+    #add_user_tree_scroll.configure(background="#1F1F1F")
+    add_user_tree_scroll.pack(side=RIGHT, fill=Y)
+    # configure the canvas
+    add_user_canvas.configure(yscrollcommand=add_user_tree_scroll.set)
+    add_user_canvas.bind('<Configure>', lambda e: add_user_canvas.configure(scrollregion=add_user_canvas.bbox("all")))
+    # second frame inside the canvas
+    add_user_second_frame = Frame(add_user_canvas)
+    add_user_second_frame.configure(bg="#282828")
+    #add the second frame to the windows in the canvas
+    add_user_canvas.create_window((0,0), window=add_user_second_frame, anchor="nw")
+
 
 
 
@@ -1114,50 +1134,130 @@ def add_user():
         # Close connexion
         mydb.close()
 
-    # email entry
-    email_label = Label(add_user_window, text="new user email : ")
-    email_label.grid(row=0, column=0, padx=10, pady=30, sticky=W)
-    email_label.config(background="#282828",
-                       foreground="white")
-    email_entry = Entry(add_user_window, width=30)
-    email_entry.grid(row=0, column=1, padx=10, pady=10, sticky=W)
+    # Grant title
+    grant_label = Label(add_user_second_frame, text="Grant Library Access")
+    grant_label.grid(row=0, column=0, padx=10, pady=10, sticky=W)
+    grant_label.config(background="#282828",
+                       foreground="white",
+                       font="Helvetica 14 bold")
+    # grant_text_label entry
+    grant_text_label = Label(add_user_second_frame, text="Enter the email of a new user and invite him to Plex. New users will be asked to accept the invitation.")
+    grant_text_label.grid(row=1, column=0, padx=10, pady=10, sticky=W)
+    grant_text_label.config(background="#282828", foreground="white")
+
+    email_entry = Entry(add_user_second_frame, width=30)
+    email_entry.insert(0, "new user email")
+    email_entry.grid(row=2, column=0, padx=10, pady=10, sticky=W)
 
     # server selection
     cursor.execute("SELECT serverName FROM plexservers;")
     server_records = cursor.fetchall()
-    server_selection_label = Label(add_user_window, text="select server to add user ")
-    server_selection_label.grid(row=1, column=0, padx=10, pady=10, sticky=W)
+    server_selection_label = Label(add_user_second_frame, text="select server and libraries your new user can access ")
+    server_selection_label.grid(row=3, column=0, padx=10, pady=10, sticky=W)
     server_selection_label.config(background="#282828",
                                   foreground="white")
     server_clicked = StringVar()
     server_clicked.set("select server")
-    server_name_drop = OptionMenu(add_user_window, server_clicked, *server_records, command=select_library) #, command=select_library
-    server_name_drop.grid(row=1, column=1, padx=10, pady=10, sticky=W)
+    server_name_drop = OptionMenu(add_user_second_frame, server_clicked, *server_records, command=select_library) #, command=select_library
+    server_name_drop.grid(row=4, column=0, padx=10, pady=10, sticky=W)
     global selected_server
     selected_server = server_clicked.get()[2:-3]
 
-    library_selection_label = Label(add_user_window, text="select library to add to user ")
-    library_selection_label.grid(row=1, column=2, padx=10, pady=10, sticky=W)
-    library_selection_label.config(background="#282828",
-                                   foreground="white")
-
+    #library_selection_label = Label(add_user_second_frame, text="select library to add to user ")
+    #library_selection_label.grid(row=4, column=0, padx=10, pady=10, sticky=W)
+    #library_selection_label.config(background="#282828",
+    #                               foreground="white")
     #library_frame_for_user = Frame(add_user_window)
     #library_for_user_scrollbar = Scrollbar(add_user_window, orient=VERTICAL)
-
-    library_listbox = Listbox(add_user_window, selectmode=MULTIPLE) #, yscrollcommand=library_for_user_scrollbar.set)
+    library_listbox = Listbox(add_user_second_frame, selectmode=MULTIPLE) #, yscrollcommand=library_for_user_scrollbar.set)
     #library_for_user_scrollbar.config(command=library_listbox.yview)
-    library_listbox.grid(row=1, column=3, padx=10, pady=10, sticky=W)
+    library_listbox.grid(row=5, column=0, padx=10, pady=10, sticky=W)
     #library_for_user_scrollbar.grid(sticky=E)
-
-
     #library_listbox.insert(0, *library_result)
 
+    # restriction text entry
+    restriction_text_label = Label(add_user_second_frame,
+                             text="You can restrict this friend's access to certain features and content. These restrictions apply to all items shared with this friend. \nYou can change them at any time.", justify="left")
+    restriction_text_label.grid(row=6, column=0, padx=10, pady=10, sticky=W)
+    restriction_text_label.config(background="#282828", foreground="white")
+
+    # donwload checkbox
+    download_checkbox = tkinter.Checkbutton(add_user_second_frame, text="Allow Downloads", background="#282828", activebackground="#383838", foreground="white", activeforeground="white")
+    download_checkbox.grid(row=7, column=0, padx=10, pady=10, sticky=W)
+    download_checkbox_text_label = Label(add_user_second_frame, text="Allow this friens to download content from your server.")
+    download_checkbox_text_label.grid(row=8, column=0, padx=10, pady=10, sticky=W)
+    download_checkbox_text_label.config(background="#282828", foreground="grey")
+
+    # movies restrictions
+    content_restriction_movies_text_label = Label(add_user_second_frame, text="Content Restrictions - Movies")
+    content_restriction_movies_text_label.grid(row=9, column=0, padx=10, pady=10, sticky=W)
+    content_restriction_movies_text_label.config(background="#282828", foreground="white")
+
+    allow_only_rating_movies_text_label = Label(add_user_second_frame, text="ALLOW ONLY RATINGS")
+    allow_only_rating_movies_text_label.grid(row=10, column=0, padx=10, pady=10, sticky=W)
+    allow_only_rating_movies_text_label.config(background="#282828", foreground="grey")
+    allow_only_rating_movies_entry = Entry(add_user_second_frame, width=30)
+    allow_only_rating_movies_entry.insert(0, "Allow all ratings - NOT WORKING")
+    allow_only_rating_movies_entry.grid(row=11, column=0, padx=10, pady=10, sticky=W)
+
+    exclude_rating_movies_text_label = Label(add_user_second_frame, text="EXCLUDE RATINGS")
+    exclude_rating_movies_text_label.grid(row=12, column=0, padx=10, pady=10, sticky=W)
+    exclude_rating_movies_text_label.config(background="#282828", foreground="grey")
+    exclude_rating_movies_entry = Entry(add_user_second_frame, width=30)
+    exclude_rating_movies_entry.insert(0, "Don't exclude any ratings - NOT WORKING")
+    exclude_rating_movies_entry.grid(row=13, column=0, padx=10, pady=10, sticky=W)
+
+    allow_only_labels_movies_text_label = Label(add_user_second_frame, text="ALLOW ONLY LABELS")
+    allow_only_labels_movies_text_label.grid(row=14, column=0, padx=10, pady=10, sticky=W)
+    allow_only_labels_movies_text_label.config(background="#282828", foreground="grey")
+    allow_only_labels_movies_entry = Entry(add_user_second_frame, width=30)
+    allow_only_labels_movies_entry.insert(0, "Show all labels - NOT WORKING")
+    allow_only_labels_movies_entry.grid(row=15, column=0, padx=10, pady=10, sticky=W)
+
+    exclude_only_labels_movies_text_label = Label(add_user_second_frame, text="EXCLUDE LABELS")
+    exclude_only_labels_movies_text_label.grid(row=16, column=0, padx=10, pady=10, sticky=W)
+    exclude_only_labels_movies_text_label.config(background="#282828", foreground="grey")
+    exclude_only_labels_movies_entry = Entry(add_user_second_frame, width=30)
+    exclude_only_labels_movies_entry.insert(0, "Don't exclude any labels - NOT WORKING")
+    exclude_only_labels_movies_entry.grid(row=17, column=0, padx=10, pady=10, sticky=W)
+
+    # tvshows restrictions
+    content_restriction_tvshows_text_label = Label(add_user_second_frame, text="Content Restrictions - tvshows")
+    content_restriction_tvshows_text_label.grid(row=18, column=0, padx=10, pady=10, sticky=W)
+    content_restriction_tvshows_text_label.config(background="#282828", foreground="white")
+
+    allow_only_rating_tvshows_text_label = Label(add_user_second_frame, text="ALLOW ONLY RATINGS")
+    allow_only_rating_tvshows_text_label.grid(row=19, column=0, padx=10, pady=10, sticky=W)
+    allow_only_rating_tvshows_text_label.config(background="#282828", foreground="grey")
+    allow_only_rating_tvshows_entry = Entry(add_user_second_frame, width=30)
+    allow_only_rating_tvshows_entry.insert(0, "Allow all ratings - NOT WORKING")
+    allow_only_rating_tvshows_entry.grid(row=20, column=0, padx=10, pady=10, sticky=W)
+
+    exclude_rating_tvshows_text_label = Label(add_user_second_frame, text="EXCLUDE RATINGS")
+    exclude_rating_tvshows_text_label.grid(row=21, column=0, padx=10, pady=10, sticky=W)
+    exclude_rating_tvshows_text_label.config(background="#282828", foreground="grey")
+    exclude_rating_tvshows_entry = Entry(add_user_second_frame, width=30)
+    exclude_rating_tvshows_entry.insert(0, "Don't exclude any ratings - NOT WORKING")
+    exclude_rating_tvshows_entry.grid(row=22, column=0, padx=10, pady=10, sticky=W)
+
+    allow_only_labels_tvshows_text_label = Label(add_user_second_frame, text="ALLOW ONLY LABELS")
+    allow_only_labels_tvshows_text_label.grid(row=23, column=0, padx=10, pady=10, sticky=W)
+    allow_only_labels_tvshows_text_label.config(background="#282828", foreground="grey")
+    allow_only_labels_tvshows_entry = Entry(add_user_second_frame, width=30)
+    allow_only_labels_tvshows_entry.insert(0, "Show all labels - NOT WORKING")
+    allow_only_labels_tvshows_entry.grid(row=24, column=0, padx=10, pady=10, sticky=W)
+
+    exclude_only_labels_tvshows_text_label = Label(add_user_second_frame, text="EXCLUDE LABELS")
+    exclude_only_labels_tvshows_text_label.grid(row=24, column=0, padx=10, pady=10, sticky=W)
+    exclude_only_labels_tvshows_text_label.config(background="#282828", foreground="grey")
+    exclude_only_labels_tvshows_entry = Entry(add_user_second_frame, width=30)
+    exclude_only_labels_tvshows_entry.insert(0, "Don't exclude any labels - NOT WORKING")
+    exclude_only_labels_tvshows_entry.grid(row=26, column=0, padx=10, pady=10, sticky=W)
 
 
-
-
-    create_user_button = Button(add_user_window, text="add user", command=add_user_command)
-    create_user_button.grid(row=20, column=0, padx=10, pady=10, sticky='W')
+    create_user_button = Button(add_user_second_frame, text="SEND", command=add_user_command)
+    create_user_button.grid(row=27, column=0, padx=10, pady=10, sticky='W')
+    create_user_button.config(background="#e5a00d", activebackground="#383838", foreground="white", activeforeground="white", border="0", font='Helvetica 10 bold')
 
     # Commit changes
     mydb.commit()
@@ -1641,7 +1741,7 @@ my_server_tree.bind("<ButtonRelease>", select_server_record)
 
 # add server zone
 # Add Record Entry Boxes
-server_add_data_frame = LabelFrame(server_tab, text="Add Server options")
+server_add_data_frame = LabelFrame(server_tab, text="Add Server")
 server_add_data_frame.pack(fill="x", expand=1, padx=20)
 # Configure the server_data_frame color
 server_add_data_frame.configure(background="#282828",
