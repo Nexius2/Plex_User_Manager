@@ -6,9 +6,9 @@ I'd be glad to have some help with python and docker(GitHub).
 
 left to do:
 - in conf tab buttons are done functions not yet working
-  * add mail conf to send mail before
-  * warn users near expiation (with delay / mail)
-  * warn user of expiration (mail)
+  * add mail or tautulli conf to send message before account expiration
+  * warn users near expiation (with delay / mail or tautulli)
+  * warn user of expiration (mail or tautulli)
 - build docker container to display pum_web.py
 - add help text
 - add CHANGES to info tab
