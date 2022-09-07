@@ -14,7 +14,7 @@ RUN echo "**** install system packages ****" \
  # && wget https://raw.githubusercontent.com/blacktwin/JBOPS/master/utility/plex_api_share.py -P ./ \
  && pip3 install --no-cache-dir --upgrade --requirement /requirements.txt \
  # && rm -rf /requirements.txt /tmp/* /var/tmp/* /var/lib/apt/lists/*
-ENTRYPOINT ["python3"]
+# ENTRYPOINT ["python3"]
 # run script 
 EXPOSE 8097
 CMD ["./pum.py"]
