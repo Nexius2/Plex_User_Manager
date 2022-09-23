@@ -267,11 +267,14 @@ def import_data():
 
     # remove user access if expired
     if remove_user_access == "1":
-        cursor.execute("SELECT email, serverName FROM plexusers WHERE account_expire_date < CURDATE() AND NOT (SELECT email FROM plexlibraries WHERE plexusers.email = plexlibraries.email AND plexusers.serverName = plexlibraries.serverName);")
+        cursor.execute("SELECT DISTINCT plexusers.email, plexusers.serverName FROM plexusers, plexlibraries WHERE plexusers.account_expire_date < CURDATE() AND plexusers.email = plexlibraries.email AND plexusers.serverName = plexlibraries.serverName;")
         expired_user = cursor.fetchall()
-        #print(expired_user)
+        print("following users will have access deleted:")
+        print(expired_user)
         for exp_usr in expired_user:
+            #print("deleting: " + exp_usr)
             usr_job = expired_user[0]
+            #print(expired_user[0])
             config_path = ".config/"
             # DB connection
             # Read config.ini file
@@ -1949,6 +1952,8 @@ delete_user_conf_label.config(background="#1F1F1F",
 save_user_options_settings_button = Button(general_tab, text="Save", command=save_user_options_conf_command)
 save_user_options_settings_button.grid(row=20, column=0, padx=300, pady=10, sticky='W')
 save_user_options_settings_button.config(background="#e5a00d", activebackground="#383838", foreground="white", activeforeground="white", border="0", font='Helvetica 10 bold')
+
+# COMMUNICATION TAB ****************************************************************************************************
 
 
 

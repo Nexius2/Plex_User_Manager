@@ -1,3 +1,5 @@
+v0.47
+- corrected remove libraries when multiple changes
 v0.46
 - add user visualy completed
 - corrected expired users not removed from plexlibraries DB
