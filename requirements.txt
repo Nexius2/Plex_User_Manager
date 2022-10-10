@@ -3,6 +3,6 @@
 # pip install -r requirements.txt
 #---------------------------------------------------------
 requests
-plexapi
+PlexAPI
 urllib3
 mysql-connector-python
