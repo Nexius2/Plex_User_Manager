@@ -17,4 +17,4 @@ RUN echo "**** install system packages ****" \
 #ENTRYPOINT ["python3"]
 # run script 
 # EXPOSE 8097
-CMD ["./pum.py"]
+CMD [“python”, "./pum.py"]
