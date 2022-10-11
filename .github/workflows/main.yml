@@ -43,4 +43,4 @@ jobs:
           context: .
           file: ./Dockerfile
           push: true
-          tags: ${{ secrets.DOCKER_USERNAME }}/hellodocker:latest
+          tags: ${{ secrets.DOCKER_USERNAME }}/plex_user_manager:latest
