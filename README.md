@@ -1,6 +1,7 @@
 # Plex User Manager
 
-Tool to manage plex users because we can't make the difference between all of them now plex has decided to rename them. 
+Plex User Manager is a tool to help manage your users from your plex servers. As we now can't clearly identify our users, this will help you make the difference.
+Creation, edition, or deletion of users and access is no longer a problem.
 Also adding access expiration to stop user access when date passed.
 I'd be glad to have some help with python and docker(GitHub).
 
