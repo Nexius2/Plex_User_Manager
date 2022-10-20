@@ -1,6 +1,12 @@
-FROM python:3
+FROM ubuntu:latest
+LABEL maintainer="Nexius2" \
+      name="plex_user_manager" \
+      version="0.47"
 COPY . /
+ADD pum.py .
+ENV TZ=Europe/Paris
 ENV CONFIG_PATH=./.config/plexapi/config.ini
+ARG DEBIAN_FRONTEND=noninteractive
 RUN echo "**** install system packages ****" \
  && apt-get update \
  && apt-get upgrade -y --no-install-recommends \
@@ -9,4 +15,3 @@ RUN echo "**** install system packages ****" \
  && pip3 install --no-cache-dir --upgrade --requirement /requirements.txt \
  && apt-get clean \
 CMD ["python", "./pum.py"]
-
