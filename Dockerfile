@@ -2,7 +2,8 @@ FROM ubuntu:latest
 LABEL maintainer="Nexius2" \
       name="plex_user_manager" \
       version="0.47"
-COPY . ./
+WORKDIR /usr/app
+COPY pum.py ./
 
 ENV TZ=Europe/Paris
 ENV CONFIG_PATH=./.config/plexapi/config.ini
