@@ -3,7 +3,7 @@ LABEL maintainer="Nexius2" \
       name="plex_user_manager" \
       version="0.2"
 COPY . /
-ADD pum.py
+ADD pum.py .
 ENV TZ=Europe/Paris
 ENV CONFIG_PATH=./.config/plexapi/config.ini
 ARG DEBIAN_FRONTEND=noninteractive
