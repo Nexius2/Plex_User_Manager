@@ -1,17 +1,22 @@
-FROM ubuntu:latest
-LABEL maintainer="Nexius2" \
-      name="plex_user_manager" \
-      version="0.47"
-COPY . /
-ADD pum.py .
-ENV TZ=Europe/Paris
-ENV CONFIG_PATH=./.config/plexapi/config.ini
-ARG DEBIAN_FRONTEND=noninteractive
+FROM python:3.8
+
+# Create the virtual environment
+RUN python3 -m venv /venv
+
+# Activate the virtual environment
+ENV PATH="/venv/bin:$PATH"
+RUN /venv/bin/activate
+
 RUN echo "**** install system packages ****" \
- && apt-get update \
- && apt-get upgrade -y --no-install-recommends \
- && apt-get install -y python3 python3-pip python3-tk mysql-server tzdata wget \
+ && apt-get install -y python3-pip python3-tk mysql-server tzdata wget \
  && wget https://raw.githubusercontent.com/blacktwin/JBOPS/master/utility/plex_api_share.py \
- && pip3 install --no-cache-dir --upgrade --requirement /requirements.txt \
- && apt-get clean \
-CMD ["python", "./pum.py"]
+
+# Install the dependencies
+COPY requirements.txt .
+RUN pip install -r requirements.txt
+
+# Copy the application code
+COPY . .
+
+# Run the application
+CMD ["/venv/bin/python", "pum.py"]
