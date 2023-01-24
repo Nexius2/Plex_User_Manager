@@ -10,7 +10,7 @@ RUN ls -la /venv
 ENV PATH="/venv/bin:$PATH"
 RUN echo $PATH
 RUN chmod +x /venv/bin/activate
-RUN /venv/bin/python3 -m pip install --upgrade pi
+RUN /venv/bin/python3 -m pip install --upgrade pip
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt
@@ -19,7 +19,7 @@ COPY . .
 
 EXPOSE 8010
 
-ENV MYSQL_ROOT_PASSWORD=<PUM-USER>
+ENV MYSQL_ROOT_PASSWORD=PUM-USER
 
 # Create a new database and user
 RUN service mysql start \
