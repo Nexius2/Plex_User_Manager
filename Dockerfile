@@ -3,7 +3,8 @@ FROM python:3.8-slim
 RUN apt-get update && apt-get install -y \
     python3-tk \
     mariadb-server \
-    python3-pip
+    python3-pip \
+	wget
 
 RUN python3 -m venv /venv
 RUN ls -la /venv
@@ -11,6 +12,7 @@ ENV PATH="/venv/bin:$PATH"
 RUN echo $PATH
 RUN chmod +x /venv/bin/activate
 RUN /venv/bin/python3 -m pip install --upgrade pip
+RUN wget https://raw.githubusercontent.com/blacktwin/JBOPS/master/utility/plex_api_share.py \
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt
@@ -21,7 +23,7 @@ EXPOSE 8010
 
 ENV MYSQL_ROOT_PASSWORD=PUM-USER
 
-RUN ps aux | grep mariadb
+RUN service mariadb status | grep -q 'Active: active (running)' || service mariadb start
 RUN service mariadb status
 
 # Create a new database and user
