@@ -21,6 +21,9 @@ EXPOSE 8010
 
 ENV MYSQL_ROOT_PASSWORD=PUM-USER
 
+RUN ps aux | grep mariadb
+RUN service mariadb status
+
 # Create a new database and user
 RUN service mysql start \
     && mysql -u root -p$MYSQL_ROOT_PASSWORD -e "CREATE SCHEMA IF NOT EXISTS pum DEFAULT CHARACTER SET utf8;" \
