@@ -12,7 +12,7 @@ ENV PATH="/venv/bin:$PATH"
 RUN echo $PATH
 RUN chmod +x /venv/bin/activate
 RUN /venv/bin/python3 -m pip install --upgrade pip
-RUN wget https://raw.githubusercontent.com/blacktwin/JBOPS/master/utility/plex_api_share.py \
+# RUN wget https://raw.githubusercontent.com/blacktwin/JBOPS/master/utility/plex_api_share.py \
 
 COPY requirements.txt .
 RUN pip install -r requirements.txt
