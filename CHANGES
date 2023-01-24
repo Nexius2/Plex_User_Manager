@@ -1,3 +1,8 @@
+v0.48
+- corrected mail to add new user
+- changed config.ini access
+- correct offline status to update at every sync
+- deleted servers are remove from db
 v0.47
 - corrected remove libraries when multiple changes
 v0.46

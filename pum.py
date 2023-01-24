@@ -14,6 +14,7 @@ import plexapi
 import glob
 import json
 import threading
+from config import *
 
 # **********************************************************************************************************************
 # ********************************************* GUI settings ***********************************************************
@@ -89,6 +90,7 @@ style.map('Treeview',
 # var for new servers
 NEW_PLEX_SERVER = ""
 
+"""
 # global config_path
 config_path = ".config/"
 api_path = "api/"
@@ -121,6 +123,7 @@ db_host = userinfo["host"]
 db_user = userinfo["user"]
 db_passwd = userinfo["passwd"]
 db_db = userinfo["db"]
+"""
 
 # connect to MySQL
 mydb = mysql.connector.connect(
@@ -205,6 +208,7 @@ def db_create():
 def import_data():
     global NEW_PLEX_SERVER, NEW_PLEX_URL, NEW_PLEX_TOKEN
     root.title('Plex User Manager... loading data...')
+    """
     config_path = ".config/"
     api_path = "api/"
     # DB connection
@@ -224,6 +228,7 @@ def import_data():
     # Get the conf info
     userinfo = config_object["CONF"]
     remove_user_access = userinfo["remove_user_access"]
+    """
     # connect to MySQL
     mydb = mysql.connector.connect(
         host=db_host,
@@ -269,12 +274,13 @@ def import_data():
     if remove_user_access == "1":
         cursor.execute("SELECT DISTINCT plexusers.email, plexusers.serverName FROM plexusers, plexlibraries WHERE plexusers.account_expire_date < CURDATE() AND plexusers.email = plexlibraries.email AND plexusers.serverName = plexlibraries.serverName;")
         expired_user = cursor.fetchall()
-        print("following users will have access deleted:")
+        print("following users will have access removed:")
         print(expired_user)
         for exp_usr in expired_user:
             #print("deleting: " + exp_usr)
             usr_job = expired_user[0]
             #print(expired_user[0])
+            """
             config_path = ".config/"
             # DB connection
             # Read config.ini file
@@ -286,6 +292,7 @@ def import_data():
             db_user = userinfo["user"]
             db_passwd = userinfo["passwd"]
             db_db = userinfo["db"]
+            """
 
             # connect to MySQL
             mydb = mysql.connector.connect(
@@ -320,7 +327,7 @@ def import_data():
     if NEW_PLEX_SERVER:
         records = [NEW_PLEX_SERVER, NEW_PLEX_URL, NEW_PLEX_TOKEN]
     else:
-        cursor.execute("SELECT * FROM plexservers WHERE server_offline = 0;")
+        cursor.execute("SELECT * FROM plexservers;")
         records = cursor.fetchall()
     for record in records:
         #serverName = record[0]
@@ -471,6 +478,8 @@ def import_data():
     root.title('Plex User Manager')
     query_user_info()
     multithreading_sync_data()
+    print("All data imported")
+
 
 def multithreading_import_data():
     thread_import_data = threading.Thread(target=import_data, name="import data")
@@ -511,6 +520,7 @@ else:
 
 def query_user_info():
     # DB connection
+    """
     # Read config.ini file
     config_object = ConfigParser()
     config_object.read(config_path + "pum.ini")
@@ -520,6 +530,7 @@ def query_user_info():
     db_user = userinfo["user"]
     db_passwd = userinfo["passwd"]
     db_db = userinfo["db"]
+    """
     # connect to MySQL
     mydb = mysql.connector.connect(
         host=db_host,
@@ -604,6 +615,7 @@ def select_user_record(e):
     config_path = ".config/"
     api_path = "api/"
     # DB connection
+    """
     # Read config.ini file
     config_object = ConfigParser()
     config_object.read(config_path + "pum.ini")
@@ -613,6 +625,7 @@ def select_user_record(e):
     db_user = userinfo["user"]
     db_passwd = userinfo["passwd"]
     db_db = userinfo["db"]
+    """
     # connect to MySQL
     mydb = mysql.connector.connect(
         host=db_host,
@@ -783,6 +796,7 @@ def update_user_record():
     config_path = ".config/"
     api_path = "api/"
     # DB connection
+    """
     # Read config.ini file
     config_object = ConfigParser()
     config_object.read(config_path + "pum.ini")
@@ -792,6 +806,7 @@ def update_user_record():
     db_user = userinfo["user"]
     db_passwd = userinfo["passwd"]
     db_db = userinfo["db"]
+    """
     # connect to MySQL
     mydb = mysql.connector.connect(
         host=db_host,
@@ -850,6 +865,7 @@ def update_user_record():
 # delete user
 def delete_user():
     # DB connection
+    """
     # Read config.ini file
     config_object = ConfigParser()
     config_object.read(config_path + "pum.ini")
@@ -859,6 +875,7 @@ def delete_user():
     db_user = userinfo["user"]
     db_passwd = userinfo["passwd"]
     db_db = userinfo["db"]
+    """
     # connect to MySQL
     mydb = mysql.connector.connect(
         host=db_host,
@@ -1015,6 +1032,7 @@ def add_user():
 
 
 
+    """
     config_path = ".config/"
     # DB connection
     # Read config.ini file
@@ -1026,6 +1044,7 @@ def add_user():
     db_user = userinfo["user"]
     db_passwd = userinfo["passwd"]
     db_db = userinfo["db"]
+    """
 
     # connect to MySQL
     mydb = mysql.connector.connect(
@@ -1040,6 +1059,7 @@ def add_user():
     # add the user
     def add_user_command():
         import re
+        """
         config_path = ".config/"
         # DB connection
         # Read config.ini file
@@ -1051,6 +1071,7 @@ def add_user():
         db_user = userinfo["user"]
         db_passwd = userinfo["passwd"]
         db_db = userinfo["db"]
+        """
 
         # connect to MySQL
         mydb = mysql.connector.connect(
@@ -1100,6 +1121,7 @@ def add_user():
 
     # library selection
     def select_library(server_clicked):
+        """
         config_path = ".config/"
         # DB connection
         # Read config.ini file
@@ -1111,6 +1133,7 @@ def add_user():
         db_user = userinfo["user"]
         db_passwd = userinfo["passwd"]
         db_db = userinfo["db"]
+        """
 
         # connect to MySQL
         mydb = mysql.connector.connect(
@@ -1149,7 +1172,7 @@ def add_user():
     grant_text_label.config(background="#282828", foreground="white")
 
     email_entry = Entry(add_user_second_frame, width=30)
-    email_entry.insert(0, "new user email")
+    email_entry.insert(0, "user@email")
     email_entry.grid(row=2, column=0, padx=10, pady=10, sticky=W)
 
     # server selection
@@ -1555,7 +1578,8 @@ def select_server_record(e):
 
 
 # Update server Record
-def delete_server_record():
+def delete_server_record(serverName_entry, url_entry):
+    """
     # Read config.ini file
     config_object = ConfigParser()
     config_object.read(config_path + "pum.ini")
@@ -1565,6 +1589,7 @@ def delete_server_record():
     db_user = userinfo["user"]
     db_passwd = userinfo["passwd"]
     db_db = userinfo["db"]
+    """
     # connect to MySQL
     mydb = mysql.connector.connect(
         host=db_host,
@@ -1573,8 +1598,10 @@ def delete_server_record():
         database=db_db,
         auth_plugin='mysql_native_password')
     # Create a cursor and initialize it
+    print(serverName_entry) #with python and tkinter, how to pass an entry.get() in a def?
+    #print(serverNameDisplay)
     cursor = mydb.cursor()
-    cursor.execute("DELETE FROM plexservers WHERE ServerName = %s AND url = %s;", [serverName_entry.get(), url_entry.get()])
+    cursor.execute("DELETE FROM plexservers WHERE ServerName = %s AND url = %s;", [serverName_entry, url_entry]) #[serverName_entry.get(), url_entry.get()])
     # Commit changes
     mydb.commit()
     # Close connexion
@@ -1583,10 +1610,11 @@ def delete_server_record():
     my_server_tree.delete(*my_server_tree.get_children())
     # get server data back
     query_server_info()
-    server_serverName_entry.delete(0, END)
-    url_entry.delete(0, END)
-    token_entry.delete(0, END)
-    server_offline_entry.delete(0, END)
+    #server_serverName_entry.delete(0, END)
+    #url_entry.delete(0, END)
+    #token_entry.delete(0, END)
+    #server_offline_entry.delete(0, END)
+    
 
 
 # Add server record
@@ -1596,6 +1624,7 @@ def add_server_record():
     if NEW_PLEX_TOKEN == '' or NEW_PLEX_URL == '':
         return
     # Read config.ini file
+    """
     config_object = ConfigParser()
     config_object.read(config_path + "pum.ini")
     # Get the conf info
@@ -1604,6 +1633,7 @@ def add_server_record():
     db_user = userinfo["user"]
     db_passwd = userinfo["passwd"]
     db_db = userinfo["db"]
+    """
     # connect to MySQL
     mydb = mysql.connector.connect(
         host=db_host,
@@ -1734,7 +1764,7 @@ server_offline_entry.config(state="disabled",
                             disabledbackground="#282828")
 
 # delete server button
-delete_server_button = Button(server_data_frame, text="Delete Record", command=delete_server_record)
+delete_server_button = Button(server_data_frame, text="Delete server", command=lambda:delete_server_record(server_serverName_entry.get(), url_entry.get()))
 delete_server_button.grid(row=1, column=4, padx=10, pady=10)
 delete_server_button.config(background="#e5a00d", activebackground="#383838", foreground="white",
                             activeforeground="white", border="0", font='Helvetica 10 bold')
@@ -1756,7 +1786,7 @@ new_url_label.config(background="#282828",
                      foreground="white")
 # URL entry box
 new_url_entry = Entry(server_add_data_frame, width=30)
-new_url_entry.insert(0, "https://192.168.1.1:32400")
+new_url_entry.insert(0, "http://192.168.1.200:32400")
 new_url_entry.grid(row=0, column=1, padx=10, pady=10)
 # Token label
 new_token_label = Label(server_add_data_frame, text="token")
@@ -1955,6 +1985,14 @@ save_user_options_settings_button.config(background="#e5a00d", activebackground=
 
 # COMMUNICATION TAB ****************************************************************************************************
 
+
+# Backup & Restore TAB *************************************************************************************************
+def backup_command():
+    os.system("python3 api/backup.py")
+
+backup_button = Button(backup_restore_tab, text="Backup DB", command=backup_command)
+backup_button.grid(row=0, column=0, padx=300, pady=10, sticky='W')
+backup_button.config(background="#e5a00d", activebackground="#383838", foreground="white", activeforeground="white", border="0", font='Helvetica 10 bold')
 
 
 # **********************************************************************************************************************
