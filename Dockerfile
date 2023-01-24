@@ -23,9 +23,9 @@ ENV MYSQL_ROOT_PASSWORD=PUM-USER
 
 # Create a new database and user
 RUN service mysql start \
-    && mysql -u root -p$MYSQL_ROOT_PASSWORD -e "CREATE SCHEMA IF NOT EXISTS <pum> DEFAULT CHARACTER SET utf8;" \
-    && mysql -u root -p$MYSQL_ROOT_PASSWORD -e "CREATE USER IF NOT EXISTS '<pumuser>'@'%' IDENTIFIED BY '<PUM-USER>';" \
-    && mysql -u root -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON <pum>.* TO '<pumuser>'@'%';" \
+    && mysql -u root -p$MYSQL_ROOT_PASSWORD -e "CREATE SCHEMA IF NOT EXISTS pum DEFAULT CHARACTER SET utf8;" \
+    && mysql -u root -p$MYSQL_ROOT_PASSWORD -e "CREATE USER IF NOT EXISTS 'pumuser'@'%' IDENTIFIED BY 'PUM-USER';" \
+    && mysql -u root -p$MYSQL_ROOT_PASSWORD -e "GRANT ALL PRIVILEGES ON pum.* TO 'pumuser'@'%';" \
     && mysql -u root -p$MYSQL_ROOT_PASSWORD -e "FLUSH PRIVILEGES;"
 
 CMD ["/venv/bin/python", "pum.py"]
