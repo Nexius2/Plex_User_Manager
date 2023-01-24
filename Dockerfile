@@ -2,7 +2,7 @@ FROM python:3.8-slim
 
 RUN apt-get update && apt-get install -y \
     python3-tk \
-    mysql-server \
+    mariadb-server \
     python3-pip
 
 RUN python3 -m venv /venv
