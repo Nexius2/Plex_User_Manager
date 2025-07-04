@@ -1,3 +1,11 @@
+> **⚠️ This tool is now OBSOLETE. Please use [VODUM](https://github.com/Nexius2/VODUM)) for all Plex user management.**
+>
+> _Cet outil est obsolète. Merci d’utiliser [VODUM](https://github.com/Nexius2/VODUM)) pour la gestion des utilisateurs Plex._
+
+
+
+
+
 # Plex User Manager
 
 Plex User Manager is a tool to help manage your users from your plex servers. As we now can't clearly identify our users, this will help you make the difference.
