@@ -28,4 +28,5 @@ bugs:
 Usage:
  - run python3 pum.py
  
-![screen](https://user-images.githubusercontent.com/9554635/172479259-af074417-b187-4483-8e98-91dde70861ba.png)
+
+
